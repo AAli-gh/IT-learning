@@ -1,0 +1,37 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<nav class="text-xs text-slate-500 mb-2"><a href="{% url 'panel:courses' %}">دوره‌های من</a> ‹ <a href="{% url 'panel:course' course.slug %}">{{ course.title }}</a></nav>
+<article class="card p-6">
+  <h1 class="text-2xl font-extrabold">{{ assignment.title }}</h1>
+  <p class="mt-1 text-sm text-slate-500">نمرهٔ کل {{ assignment.max_score|fa_digits }}{% if assignment.due_at %} · مهلت تحویل: {{ assignment.due_at|jdate:"%d %B %Y ساعت %H:%M" }}{% endif %}</p>
+  <div class="prose prose-slate dark:prose-invert max-w-none leading-8 mt-4">{{ assignment.description_html|safe }}</div>
+</article>
+
+{% if submission and submission.is_graded %}
+<div class="card p-6 mt-5">
+  <h2 class="font-extrabold mb-2">نتیجه</h2>
+  <p class="text-3xl font-black {% if submission.passed %}text-emerald-600{% else %}text-rose-600{% endif %}">{{ submission.score|fa_digits }} <span class="text-base font-normal text-slate-500">از {{ assignment.max_score|fa_digits }}</span></p>
+  <p class="text-sm mt-1">{% if submission.passed %}قبول{% else %}مردود (حد نصاب {{ assignment.pass_percent|fa_digits }}٪){% endif %}</p>
+  {% if submission.feedback %}<p class="mt-3 leading-8 panel !p-3 text-sm">{{ submission.feedback|linebreaksbr }}</p>{% endif %}
+</div>
+{% endif %}
+
+<div class="card p-6 mt-5">
+  <h2 class="font-extrabold mb-3">پاسخ شما</h2>
+  {% if error %}<p class="rounded-xl bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-200 px-3 py-2 text-sm mb-3" role="alert">{{ error }}</p>{% endif %}
+  {% if submission %}<p class="text-xs text-slate-500 mb-3">آخرین تحویل: {{ submission.submitted_at|jdate:"%d %B ساعت %H:%M" }}{% if submission.file %} · <a class="text-brand-600" href="{% url 'panel:submission_file' submission.pk %}">فایل ارسالی</a>{% endif %}</p>{% endif %}
+  {% if locked %}
+    <p class="text-sm text-slate-500">{% if submission.is_graded %}این تکلیف نمره‌گذاری شده است.{% else %}مهلت تحویل تمام شده است.{% endif %}</p>
+    {% if submission.text %}<div class="panel !p-3 text-sm leading-8">{{ submission.text|linebreaksbr }}</div>{% endif %}
+  {% else %}
+  <form method="post" enctype="multipart/form-data" class="space-y-3 form-field">
+    {% csrf_token %}
+    <div><label for="a-text">متن پاسخ</label><textarea id="a-text" name="text" rows="6">{{ submission.text }}</textarea></div>
+    <div><label for="a-file">فایل (اختیاری، حداکثر {{ max_mb|fa_digits }} مگابایت)</label><input id="a-file" type="file" name="file"></div>
+    <button class="btn-primary">{% if submission %}ثبت مجدد پاسخ{% else %}ارسال تکلیف{% endif %}</button>
+    {% if submission %}<p class="text-xs text-slate-500">تا پیش از نمره‌گذاری می‌توانید پاسخ خود را ویرایش کنید.</p>{% endif %}
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

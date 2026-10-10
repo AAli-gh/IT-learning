@@ -123,4 +123,18 @@
     show(0);
     start();
   });
+
+  // Quiz countdown: shows the time left and submits the form when it reaches zero.
+  document.querySelectorAll("[data-countdown]").forEach((el) => {
+    const end = new Date(el.dataset.countdown).getTime();
+    const text = el.querySelector("[data-countdown-text]");
+    const form = document.getElementById("quiz-form");
+    const tick = () => {
+      const left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      text.textContent = String(Math.floor(left / 60)).padStart(2, "0") + ":" + String(left % 60).padStart(2, "0");
+      if (left === 0 && form) { clearInterval(timer); form.submit(); }
+    };
+    const timer = setInterval(tick, 1000);
+    tick();
+  });
 })();

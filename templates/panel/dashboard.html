@@ -9,7 +9,8 @@
 </div>
 {% endif %}
 
-<div class="grid grid-cols-3 gap-3 text-center mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-6">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ certificate_count|fa_digits }}</p><p class="text-xs text-slate-500">گواهی</p></div>
   <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ courses|length|fa_digits }}</p><p class="text-xs text-slate-500">دوره فعال</p></div>
   <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ done_lessons|fa_digits }}</p><p class="text-xs text-slate-500">درس انجام‌شده</p></div>
   <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ upcoming|length|fa_digits }}</p><p class="text-xs text-slate-500">کلاس پیش‌رو</p></div>
@@ -25,6 +26,9 @@
   </a>
   {% empty %}<p class="text-slate-500 text-sm">هنوز دورهٔ فعالی ندارید. <a class="text-brand-600" href="{% url 'courses:list' %}">مشاهدهٔ دوره‌ها</a></p>{% endfor %}
 </div>
+
+{% if todo %}<h2 class="section-title">تکالیف در انتظار تحویل</h2>
+<ul class="space-y-2 mb-6">{% for a in todo %}<li><a href="{% url 'panel:assignment' a.course.slug a.pk %}" class="panel !p-3 flex flex-wrap justify-between gap-2 text-sm hover:bg-white/80 dark:hover:bg-slate-800/80"><span class="font-bold">📄 {{ a.title }}</span><span class="text-slate-500">{{ a.course.title }}{% if a.due_at %} · مهلت {{ a.due_at|jdate:"%d %B" }}{% endif %}</span></a></li>{% endfor %}</ul>{% endif %}
 
 <div class="grid gap-6 md:grid-cols-2">
   <div><h2 class="section-title">کلاس‌های پیش‌رو</h2>

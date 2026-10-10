@@ -1,4 +1,8 @@
+import datetime
+import secrets
+
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import Avg, Count, Q
 from django.urls import reverse
@@ -304,3 +308,191 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Quiz(models.Model):
+    """Multiple-choice quiz of a course."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="quizzes")
+    title = models.CharField("عنوان", max_length=200)
+    description = models.TextField("توضیحات", blank=True)
+    order = models.PositiveIntegerField("ترتیب", default=0)
+    pass_percent = models.PositiveSmallIntegerField("حد نصاب قبولی (٪)", default=60)
+    time_limit_minutes = models.PositiveIntegerField("محدودیت زمان (دقیقه)", default=0, help_text="۰ = بدون محدودیت")
+    max_attempts = models.PositiveSmallIntegerField("حداکثر دفعات شرکت", default=0, help_text="۰ = نامحدود")
+    show_answers = models.BooleanField("نمایش پاسخ‌های صحیح پس از آزمون", default=False)
+    is_published = models.BooleanField("منتشر شده", default=False)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "آزمون"
+        verbose_name_plural = "آزمون‌ها"
+
+    def __str__(self):
+        return f"{self.course.title} — {self.title}"
+
+
+class Question(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
+    text = models.TextField("متن سؤال")
+    order = models.PositiveIntegerField("ترتیب", default=0)
+    points = models.PositiveSmallIntegerField("امتیاز", default=1)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "سؤال"
+        verbose_name_plural = "سؤال‌ها"
+
+    def __str__(self):
+        return self.text[:60]
+
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="choices")
+    text = models.CharField("گزینه", max_length=300)
+    is_correct = models.BooleanField("پاسخ صحیح", default=False)
+    order = models.PositiveIntegerField("ترتیب", default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "گزینه"
+        verbose_name_plural = "گزینه‌ها"
+
+    def __str__(self):
+        return self.text
+
+
+class QuizAttempt(models.Model):
+    # A submission this many seconds after the deadline is still accepted (network delay, clock skew).
+    GRACE_SECONDS = 60
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_attempts")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
+    started_at = models.DateTimeField(auto_now_add=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    answers = models.JSONField(default=dict, blank=True)  # {question_id: choice_id}
+    score_percent = models.PositiveSmallIntegerField(null=True, blank=True)
+    passed = models.BooleanField(default=False)
+    timed_out = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-started_at"]
+        verbose_name = "شرکت در آزمون"
+        verbose_name_plural = "نتایج آزمون‌ها"
+
+    def __str__(self):
+        return f"{self.user} — {self.quiz} ({self.score_percent})"
+
+    @property
+    def is_open(self):
+        return self.submitted_at is None
+
+    @property
+    def deadline(self):
+        if not self.quiz.time_limit_minutes:
+            return None
+        return self.started_at + datetime.timedelta(minutes=self.quiz.time_limit_minutes)
+
+    def grade(self, answers):
+        """Score ``answers`` ({question_id: choice_id}); too-late submissions score 0."""
+        now = timezone.now()
+        questions = list(self.quiz.questions.prefetch_related("choices"))
+        valid = {}
+        for q in questions:
+            chosen = answers.get(q.pk)
+            if chosen in {c.pk for c in q.choices.all()}:
+                valid[q.pk] = chosen
+        total = sum(q.points for q in questions)
+        earned = sum(q.points for q in questions
+                     if valid.get(q.pk) in {c.pk for c in q.choices.all() if c.is_correct})
+        late = bool(self.deadline and now > self.deadline + datetime.timedelta(seconds=self.GRACE_SECONDS))
+        self.answers = {str(k): v for k, v in valid.items()}
+        self.timed_out = late
+        self.score_percent = 0 if late or not total else round(100 * earned / total)
+        self.passed = not late and self.score_percent >= self.quiz.pass_percent
+        self.submitted_at = now
+        self.save()
+
+
+class Assignment(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="assignments")
+    title = models.CharField("عنوان", max_length=200)
+    description = models.TextField("شرح تکلیف (Markdown)")
+    order = models.PositiveIntegerField("ترتیب", default=0)
+    due_at = models.DateTimeField("مهلت تحویل", null=True, blank=True)
+    allow_late = models.BooleanField("پذیرش تحویل با تأخیر", default=False)
+    max_score = models.PositiveSmallIntegerField("نمره کل", default=100)
+    pass_percent = models.PositiveSmallIntegerField("حد نصاب قبولی (٪)", default=50)
+    is_published = models.BooleanField("منتشر شده", default=False)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "تکلیف"
+        verbose_name_plural = "تکالیف"
+
+    def __str__(self):
+        return f"{self.course.title} — {self.title}"
+
+    @property
+    def description_html(self):
+        return render_markdown(self.description)[0]
+
+    @property
+    def is_past_due(self):
+        return bool(self.due_at and timezone.now() > self.due_at)
+
+
+class Submission(models.Model):
+    ALLOWED_EXTENSIONS = ["pdf", "zip", "txt", "py", "js", "html", "css", "md", "docx", "pptx", "xlsx", "png", "jpg", "jpeg"]
+
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="submissions")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions")
+    text = models.TextField("پاسخ / توضیحات", blank=True)
+    file = models.FileField("فایل", upload_to="submissions/", storage=private_storage, blank=True,
+                            validators=[FileExtensionValidator(ALLOWED_EXTENSIONS)])
+    submitted_at = models.DateTimeField("زمان تحویل", default=timezone.now)
+    score = models.PositiveSmallIntegerField("نمره", null=True, blank=True)
+    feedback = models.TextField("بازخورد مدرس", blank=True)
+    graded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["assignment", "user"], name="one_submission_per_user")]
+        ordering = ["-submitted_at"]
+        verbose_name = "تحویل تکلیف"
+        verbose_name_plural = "تحویل‌های تکلیف"
+
+    def __str__(self):
+        return f"{self.user} — {self.assignment}"
+
+    @property
+    def is_graded(self):
+        return self.score is not None
+
+    @property
+    def passed(self):
+        return self.is_graded and self.score * 100 >= self.assignment.pass_percent * self.assignment.max_score
+
+
+def _certificate_code():
+    return "ITA-" + secrets.token_hex(5).upper()
+
+
+class Certificate(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="certificates")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="certificates")
+    holder_name = models.CharField("نام روی گواهی", max_length=150)
+    code = models.CharField("کد گواهی", max_length=20, unique=True, default=_certificate_code, editable=False)
+    issued_at = models.DateTimeField("تاریخ صدور", default=timezone.now)
+    is_revoked = models.BooleanField("ابطال شده", default=False)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "course"], name="one_certificate_per_course")]
+        ordering = ["-issued_at"]
+        verbose_name = "گواهی پایان دوره"
+        verbose_name_plural = "گواهی‌های پایان دوره"
+
+    def __str__(self):
+        return f"{self.code} — {self.holder_name}"
+
+    def get_absolute_url(self):
+        return reverse("courses:certificate", args=[self.code])

@@ -1,0 +1,27 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<nav class="text-xs text-slate-500 mb-2"><a href="{% url 'panel:courses' %}">دوره‌های من</a> ‹ <a href="{% url 'panel:course' course.slug %}">{{ course.title }}</a></nav>
+<div class="card p-6">
+  <h1 class="text-2xl font-extrabold">{{ quiz.title }}</h1>
+  {% if quiz.description %}<p class="mt-2 text-slate-600 dark:text-slate-300 leading-8">{{ quiz.description|linebreaksbr }}</p>{% endif %}
+  <dl class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+    <div class="panel !p-3"><dt class="text-slate-500">تعداد سؤال</dt><dd class="font-bold">{{ question_count|fa_digits }}</dd></div>
+    <div class="panel !p-3"><dt class="text-slate-500">حد نصاب قبولی</dt><dd class="font-bold">{{ quiz.pass_percent|fa_digits }}٪</dd></div>
+    <div class="panel !p-3"><dt class="text-slate-500">زمان</dt><dd class="font-bold">{% if quiz.time_limit_minutes %}{{ quiz.time_limit_minutes|fa_digits }} دقیقه{% else %}نامحدود{% endif %}</dd></div>
+    <div class="panel !p-3"><dt class="text-slate-500">دفعات مجاز</dt><dd class="font-bold">{% if quiz.max_attempts %}{{ quiz.max_attempts|fa_digits }}{% else %}نامحدود{% endif %}</dd></div>
+  </dl>
+  <form method="post" action="{% url 'panel:quiz_start' course.slug quiz.pk %}" class="mt-5">{% csrf_token %}
+    {% if open_attempt %}<button class="btn-primary">ادامهٔ آزمون در حال انجام</button>
+    {% elif out_of_attempts %}<p class="text-rose-600 text-sm">دفعات مجاز شرکت در این آزمون تمام شده است.</p>
+    {% else %}<button class="btn-primary" {% if quiz.time_limit_minutes %}onclick="return confirm('با شروع آزمون، زمان‌سنج فعال می‌شود. شروع شود؟')"{% endif %}>شروع آزمون</button>{% endif %}
+  </form>
+</div>
+<h2 class="section-title mt-6">نتایج قبلی</h2>
+<ul class="space-y-2">
+  {% for a in attempts %}<li><a href="{% url 'panel:quiz_result' course.slug quiz.pk a.pk %}" class="panel !p-3 flex flex-wrap justify-between gap-2 text-sm hover:bg-white/80 dark:hover:bg-slate-800/80">
+    <span>{{ a.submitted_at|jdate:"%d %B ساعت %H:%M" }}</span><span class="font-bold">{{ a.score_percent|fa_digits }}٪</span>
+    <span class="pill {% if not a.passed %}!bg-none !bg-rose-600{% endif %}">{% if a.passed %}قبول{% elif a.timed_out %}خارج از زمان{% else %}مردود{% endif %}</span></a></li>
+  {% empty %}<li class="text-slate-500 text-sm">هنوز در این آزمون شرکت نکرده‌اید.</li>{% endfor %}
+</ul>
+{% endblock %}

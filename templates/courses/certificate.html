@@ -1,0 +1,41 @@
+{% load static school %}<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if cert.is_revoked %}گواهی ابطال‌شده{% else %}گواهی پایان دوره — {{ cert.holder_name }}{% endif %} | {{ SITE_NAME }}</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <style>@media print { @page { size: A4 landscape; margin: 0 } body { background: #fff !important } .site-bg { display: none } }</style>
+</head>
+<body class="min-h-screen font-sans text-slate-800 antialiased p-4">
+  <div class="site-bg" aria-hidden="true"></div>
+  <div class="mx-auto max-w-4xl print:hidden mb-4 flex flex-wrap items-center justify-between gap-2">
+    <a href="{% url 'courses:home' %}" class="btn-ghost">← {{ SITE_NAME }}</a>
+    {% if not cert.is_revoked %}<button onclick="print()" class="btn-primary">🖨️ چاپ / ذخیره PDF</button>{% endif %}
+  </div>
+
+  {% if cert.is_revoked %}
+  <div class="mx-auto max-w-2xl card p-8 text-center"><p class="text-4xl">⚠️</p><h1 class="text-xl font-extrabold mt-2">این گواهی ابطال شده است</h1><p class="text-sm text-slate-500 mt-2">کد <span dir="ltr">{{ cert.code }}</span></p></div>
+  {% else %}
+  <main class="mx-auto max-w-4xl bg-white rounded-3xl border-[10px] border-double border-brand-600 p-8 sm:p-14 text-center shadow-xl print:shadow-none print:rounded-none print:max-w-none print:min-h-screen">
+    <span class="mx-auto grid place-items-center h-16 w-16 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white text-2xl font-black">IT</span>
+    <p class="mt-3 font-black text-xl">{{ SITE_NAME }}</p>
+    <h1 class="mt-8 text-3xl sm:text-4xl font-black text-brand-700">گواهی پایان دوره</h1>
+    <p class="mt-8 text-slate-500">بدین‌وسیله گواهی می‌شود که</p>
+    <p class="mt-3 text-3xl sm:text-4xl font-extrabold">{{ cert.holder_name }}</p>
+    <p class="mt-6 text-slate-600 leading-9">دوره‌ی <span class="font-bold text-slate-900">«{{ cert.course.title }}»</span>{% if cert.course.duration_hours %} به مدت {{ cert.course.duration_hours|fa_digits }} ساعت{% endif %} را با موفقیت به پایان رسانده است.</p>
+    <div class="mt-10 grid grid-cols-2 gap-4 text-sm text-slate-600">
+      <div><p class="text-slate-400">تاریخ صدور</p><p class="font-bold">{{ cert.issued_at|jdate }}</p></div>
+      <div><p class="text-slate-400">مدرس</p><p class="font-bold">{{ cert.course.instructor.display_name|default:"—" }}</p></div>
+    </div>
+    <div class="mt-10 border-t pt-4 text-xs text-slate-500">
+      <p>کد گواهی: <span class="font-bold" dir="ltr">{{ cert.code }}</span></p>
+      <p class="mt-1">اعتبارسنجی در آدرس زیر:</p>
+      <p dir="ltr" class="font-mono">{{ verify_url }}</p>
+    </div>
+  </main>
+  <p class="mx-auto max-w-4xl text-center text-sm text-emerald-700 mt-4 print:hidden">✅ این گواهی معتبر است و توسط {{ SITE_NAME }} صادر شده است.</p>
+  {% endif %}
+</body>
+</html>

@@ -18,6 +18,32 @@
   {% empty %}<li class="text-slate-500 text-sm">محتوای این دوره هنوز اضافه نشده است.</li>{% endfor %}
 </ol>
 
+{% if quizzes %}<h2 class="section-title">آزمون‌ها</h2>
+<ul class="space-y-2 mb-6">
+  {% for r in quizzes %}<li><a href="{% url 'panel:quiz' course.slug r.quiz.pk %}" class="panel !p-3 flex flex-wrap items-center justify-between gap-2 text-sm hover:bg-white/80 dark:hover:bg-slate-800/80">
+    <span class="font-medium">📝 {{ r.quiz.title }}</span>
+    <span class="text-slate-500">{% if r.best %}بهترین نتیجه: {{ r.best.score_percent|fa_digits }}٪{% else %}شرکت نکرده‌اید{% endif %}</span>
+    {% if r.best.passed %}<span class="pill">قبول</span>{% endif %}</a></li>{% endfor %}
+</ul>{% endif %}
+
+{% if assignments %}<h2 class="section-title">تکالیف</h2>
+<ul class="space-y-2 mb-6">
+  {% for r in assignments %}<li><a href="{% url 'panel:assignment' course.slug r.assignment.pk %}" class="panel !p-3 flex flex-wrap items-center justify-between gap-2 text-sm hover:bg-white/80 dark:hover:bg-slate-800/80">
+    <span class="font-medium">📄 {{ r.assignment.title }}</span>
+    <span class="text-slate-500">{% if r.assignment.due_at %}مهلت {{ r.assignment.due_at|jdate:"%d %B" }}{% endif %}</span>
+    <span class="pill {% if not r.submission %}!bg-none !bg-slate-500{% endif %}">{% if r.submission.is_graded %}نمره {{ r.submission.score|fa_digits }}{% elif r.submission %}در انتظار نمره{% else %}تحویل داده نشده{% endif %}</span></a></li>{% endfor %}
+</ul>{% endif %}
+
+<h2 class="section-title">گواهی پایان دوره</h2>
+<div class="card p-5 mb-6">
+  {% if certificate and not certificate.is_revoked %}
+    <p class="font-bold">🎓 گواهی شما صادر شده است.</p><a class="btn-primary mt-3" href="{{ certificate.get_absolute_url }}">مشاهده و چاپ گواهی</a>
+  {% else %}
+    <ul class="space-y-1 text-sm">{% for i in checklist %}<li class="{% if i.done %}text-emerald-600{% else %}text-slate-500{% endif %}">{% if i.done %}✓{% else %}○{% endif %} {{ i.label }}</li>{% empty %}<li class="text-slate-500">برای این دوره هنوز محتوایی تعریف نشده است.</li>{% endfor %}</ul>
+    <form method="post" action="{% url 'panel:certificate_issue' course.slug %}" class="mt-3">{% csrf_token %}<button class="btn-primary">دریافت گواهی</button></form>
+  {% endif %}
+</div>
+
 <h2 class="section-title">جلسات کلاس</h2>
 <ul class="space-y-2">
   {% for s in sessions %}<li class="panel !p-3 text-sm flex flex-wrap justify-between gap-2"><span class="font-bold">{{ s.title }}</span><span class="text-slate-500">{{ s.starts_at|jdate:"%d %B ساعت %H:%M" }}{% if s.place %} · {{ s.place }}{% endif %}</span>{% if s.recording_url %}<a class="text-brand-600" href="{{ s.recording_url }}" rel="noopener" target="_blank">ضبط جلسه</a>{% endif %}</li>

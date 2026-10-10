@@ -7,7 +7,8 @@ from django.utils import timezone
 
 from accounts.models import User
 from core.models import Page
-from courses.models import Announcement, Batch, Category, ClassSession, Course, Faq, Lesson, Topic
+from courses.models import (Announcement, Assignment, Batch, Category, Choice, ClassSession, Course, Faq, Lesson,
+                            Question, Quiz, Topic)
 
 CATEGORIES = [
     ("برنامه‌نویسی", "programming", "💻"), ("توسعه وب", "web", "🌐"), ("شبکه", "network", "🔌"),
@@ -80,5 +81,14 @@ class Command(BaseCommand):
                         when = timezone.make_aware(datetime.datetime.combine(start, datetime.time(18)) +
                                                    datetime.timedelta(days=7 * i))
                         ClassSession.objects.create(batch=batch, title=t, starts_at=when, place="کلاس ۱")
+                    quiz = Quiz.objects.create(course=course, title="آزمون پایان دوره", pass_percent=60,
+                                               time_limit_minutes=20, max_attempts=3, is_published=True)
+                    for qi, (qt, right, wrong) in enumerate([("نمونه سؤال ۱", "گزینهٔ صحیح", "گزینهٔ غلط"),
+                                                             ("نمونه سؤال ۲", "گزینهٔ صحیح", "گزینهٔ غلط")]):
+                        question = Question.objects.create(quiz=quiz, text=f"{qt}: {title}", order=qi)
+                        Choice.objects.create(question=question, text=right, is_correct=True, order=0)
+                        Choice.objects.create(question=question, text=wrong, order=1)
+                    Assignment.objects.create(course=course, title="پروژه پایانی", is_published=True,
+                                              description="پروژهٔ پایانی را انجام دهید و پاسخ یا فایل آن را ارسال کنید.")
                     Announcement.objects.create(course=course, title="خوش آمدید", body="به دوره خوش آمدید! جزئیات برگزاری در همین بخش اطلاع‌رسانی می‌شود.")
         self.stdout.write(self.style.SUCCESS("Seeded."))

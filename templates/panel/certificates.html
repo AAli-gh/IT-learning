@@ -1,0 +1,13 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<h1 class="text-2xl font-extrabold mb-4">گواهی‌های من</h1>
+<div class="grid gap-4 sm:grid-cols-2">
+  {% for c in items %}
+  <a href="{{ c.get_absolute_url }}" class="card p-5 hover:-translate-y-0.5 transition">
+    <p class="text-3xl">🎓</p><p class="font-extrabold mt-1">{{ c.course.title }}</p>
+    <p class="text-xs text-slate-500 mt-1">صدور: {{ c.issued_at|jdate }} · کد <span dir="ltr">{{ c.code }}</span></p>
+  </a>
+  {% empty %}<p class="text-slate-500">هنوز گواهی‌ای ندارید. با تکمیل درس‌ها، آزمون‌ها و تکالیف یک دوره، گواهی آن را از صفحهٔ دوره دریافت کنید.</p>{% endfor %}
+</div>
+{% endblock %}

@@ -11,7 +11,7 @@ from core import magazine
 from core.notify import notify_staff, notify_student
 
 from .forms import EnrollmentForm, ReviewForm
-from .models import Batch, Category, Course, Enrollment, Faq, Review
+from .models import Batch, Category, Certificate, Course, Enrollment, Faq, Review
 
 SORTS = {"new": "-published_at", "price": "price", "price_desc": "-price", "duration": "duration_hours"}
 ENROLL_LIMIT = (5, 3600)  # at most 5 enrollments per hour per IP
@@ -154,3 +154,10 @@ def suggest(request):
     q = request.GET.get("q", "").strip()
     results = Course.objects.published().search(q).select_related("category")[:6] if len(q) >= 2 else []
     return render(request, "courses/partials/suggest.html", {"results": results, "q": q})
+
+
+def certificate(request, code):
+    """Public verification + printable certificate (anyone with the code can check it)."""
+    cert = get_object_or_404(Certificate.objects.select_related("course", "course__instructor"), code=code.upper())
+    return render(request, "courses/certificate.html", {"cert": cert,
+                  "verify_url": request.build_absolute_uri(cert.get_absolute_url())})
