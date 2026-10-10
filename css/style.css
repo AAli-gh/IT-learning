@@ -1,0 +1,35 @@
+:root{--bg:#fff;--fg:#14202e;--muted:#5b6b7c;--card:#f4f7fb;--brand:#1f6feb;--brand2:#0b3d91;--accent:#ff7a1a;--line:#e1e7ef}
+@media (prefers-color-scheme:dark){:root{--bg:#0e141b;--fg:#e8eef5;--muted:#9aabbd;--card:#161f2a;--line:#243142;--brand:#58a6ff;--brand2:#9cc7ff}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Vazirmatn,Tahoma,system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.9}
+a{color:var(--brand);text-decoration:none}
+.wrap{max-width:1080px;margin:auto;padding:0 16px}
+header.site{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+header.site .wrap{display:flex;align-items:center;gap:20px;min-height:60px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:1.2rem;color:var(--fg)}
+nav{display:flex;gap:16px;flex:1;flex-wrap:wrap}
+nav a{color:var(--fg)}
+.btn{display:inline-block;background:var(--brand);color:#fff;padding:8px 18px;border-radius:10px;font-weight:600}
+.btn.alt{background:var(--accent)}
+.btn.ghost{background:transparent;border:1px solid var(--brand);color:var(--brand)}
+.hero{padding:64px 0;background:linear-gradient(135deg,var(--card),transparent)}
+.hero h1{font-size:2.2rem;margin:0 0 8px}
+.hero p{color:var(--muted);max-width:620px}
+.hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+section{padding:44px 0}
+h2{margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.card h3{margin:0;font-size:1.05rem}
+.card p{margin:0;color:var(--muted);font-size:.93rem}
+.meta{display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.tag{background:var(--line);padding:0 8px;border-radius:99px}
+.mag{background:var(--card);border-block:1px solid var(--line)}
+.mag .head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.mag .card{background:var(--bg)}
+.muted{color:var(--muted)}
+ul.topics{padding-inline-start:20px}
+form.contact{display:grid;gap:10px;max-width:460px}
+input,textarea{font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
