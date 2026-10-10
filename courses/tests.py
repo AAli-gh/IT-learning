@@ -1,6 +1,7 @@
 import datetime
 from unittest import mock
 
+from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -223,3 +224,15 @@ class SchoolFeatureTests(TestCase):
         self.assertContains(self.client.get(reverse("courses:faq")), "اینطور")
         self.assertContains(self.client.get(reverse("courses:suggest"), {"q": "python"}), "دوره python")
         self.assertNotContains(self.client.get(reverse("courses:suggest"), {"q": "p"}), "<li>")
+
+
+class MagazineLinksTests(TestCase):
+    """Footer links must match the magazine's real routes (/type/<type>/, /tag/<slug>/)."""
+
+    @override_settings(MAGAZINE_URL="https://mag.example")
+    def test_footer_links_use_magazine_routes(self):
+        with mock.patch("core.magazine._get", return_value=[]):
+            html = self.client.get(reverse("courses:home")).content.decode()
+        for path in ("/type/news/", "/type/article/", "/type/tutorial/"):
+            self.assertIn(f"https://mag.example{path}", html)
+        self.assertEqual(magazine.tag_url("python").replace(settings.MAGAZINE_URL, ""), "/tag/python/")
