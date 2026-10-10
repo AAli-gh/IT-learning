@@ -1,0 +1,6 @@
+{% if results %}
+<ul class="card !bg-white dark:!bg-slate-900 !backdrop-blur-none p-2 text-sm shadow-xl">
+  {% for c in results %}<li><a href="{{ c.get_absolute_url }}" class="block rounded-xl px-3 py-2 hover:bg-white/70 dark:hover:bg-slate-800/70">{{ c.category.icon }} {{ c.title }}</a></li>{% endfor %}
+  <li><a href="{% url 'courses:list' %}?q={{ q|urlencode }}" class="block px-3 py-2 text-brand-700 dark:text-brand-500">همه نتایج ←</a></li>
+</ul>
+{% endif %}

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from accounts.models import User
 from core import magazine
-from courses.models import Batch, Category, Course, Enrollment
+from courses.models import Batch, Category, Course, Enrollment, Review
 
 
 def make_course(slug="python", tag="python", published=True, **kw):
@@ -161,3 +161,65 @@ class HoneypotMarkupTests(TestCase):
         make_course()
         html = self.client.get(reverse("courses:detail", args=["python"])).content.decode()
         self.assertIn('class="form-field hp-field"', html)
+
+
+@mock.patch("core.magazine._get", return_value=[])
+class SchoolFeatureTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.course = make_course()
+        self.user = User.objects.create_user("sara", "s@e.com", "pw-12345-xyz")
+
+    def confirm(self):
+        Enrollment.objects.create(course=self.course, user=self.user, full_name="s", phone="09120000000",
+                                  status=Enrollment.Status.CONFIRMED)
+
+    def test_review_requires_confirmed_enrollment(self, _g):
+        self.client.force_login(self.user)
+        url = reverse("courses:review", args=["python"])
+        self.client.post(url, {"rating": 5, "text": "عالی"})
+        self.assertFalse(Review.objects.exists())
+        self.confirm()
+        self.client.post(url, {"rating": 5, "text": "عالی"})
+        self.client.post(url, {"rating": 1, "text": "دوباره"})
+        review = Review.objects.get()
+        self.assertFalse(review.is_approved)  # needs staff approval
+        self.assertNotContains(self.client.get(self.course.get_absolute_url()), "عالی</p>")
+
+    def test_approved_review_shown_and_rating(self, _g):
+        Review.objects.create(course=self.course, user=self.user, rating=4, text="خوب بود", is_approved=True)
+        page = self.client.get(self.course.get_absolute_url())
+        self.assertContains(page, "خوب بود")
+        self.assertEqual(Course.objects.get().rating, 4.0)
+
+    def test_enrollment_sends_emails(self, _g):
+        from django.core import mail
+
+        from core.models import SiteSettings
+
+        s = SiteSettings.load(); s.contact_email = "office@example.com"; s.save(); cache.clear()
+        self.client.post(reverse("courses:enroll", args=["python"]),
+                         {"full_name": "علی", "phone": "09121234567", "email": "ali@example.com"})
+        self.assertEqual(sorted(m.to[0] for m in mail.outbox), ["ali@example.com", "office@example.com"])
+
+    def test_contact_form(self, _g):
+        from core.models import ContactMessage
+
+        url = reverse("core:contact")
+        self.assertEqual(self.client.get(url).status_code, 200)
+        self.client.post(url, {"name": "علی", "message": "سلام"})  # no phone/email -> rejected
+        self.assertFalse(ContactMessage.objects.exists())
+        self.client.post(url, {"name": "علی", "email": "a@b.com", "message": "سلام"})
+        self.assertEqual(ContactMessage.objects.count(), 1)
+        self.client.post(url, {"name": "bot", "email": "a@b.com", "message": "x", "website": "spam"})
+        self.assertEqual(ContactMessage.objects.count(), 1)
+
+    def test_static_pages_and_suggest(self, _g):
+        from courses.models import Faq
+
+        Faq.objects.create(question="چطور؟", answer="اینطور")
+        for name in ("courses:instructors", "courses:faq", "courses:home"):
+            self.assertEqual(self.client.get(reverse(name)).status_code, 200)
+        self.assertContains(self.client.get(reverse("courses:faq")), "اینطور")
+        self.assertContains(self.client.get(reverse("courses:suggest"), {"q": "python"}), "دوره python")
+        self.assertNotContains(self.client.get(reverse("courses:suggest"), {"q": "p"}), "<li>")

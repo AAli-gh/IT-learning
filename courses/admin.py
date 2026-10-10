@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Batch, Category, Course, Enrollment, Topic
+from .models import Batch, Category, Course, Enrollment, Faq, Review, Topic
 
 
 @admin.register(Category)
@@ -53,3 +53,19 @@ class EnrollmentAdmin(admin.ModelAdmin):
     @admin.action(description="لغو ثبت‌نام‌های انتخاب‌شده")
     def cancel(self, request, queryset):
         queryset.update(status=Enrollment.Status.CANCELLED)
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ("course", "user", "rating", "is_approved", "is_featured", "created_at")
+    list_filter = ("is_approved", "is_featured", "rating", "course")
+    list_editable = ("is_approved", "is_featured")
+    search_fields = ("text", "user__username")
+
+
+@admin.register(Faq)
+class FaqAdmin(admin.ModelAdmin):
+    list_display = ("question", "course", "order", "is_published")
+    list_editable = ("order", "is_published")
+    list_filter = ("is_published", "course")
+    search_fields = ("question", "answer")

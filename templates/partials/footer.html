@@ -21,6 +21,9 @@
     <div class="min-w-0">
       <p class="font-bold text-white mb-3">درباره ما</p>
       <ul class="space-y-2 text-slate-400">
+        <li><a class="hover:text-white" href="{% url 'courses:instructors' %}">مدرسان</a></li>
+        <li><a class="hover:text-white" href="{% url 'courses:faq' %}">سؤالات متداول</a></li>
+        <li><a class="hover:text-white" href="{% url 'core:contact' %}">تماس با ما</a></li>
         {% for p in footer_pages %}<li><a class="hover:text-white" href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>{% endfor %}
         {% if site_settings.contact_phone %}<li><a class="hover:text-white" href="tel:{{ site_settings.contact_phone }}" dir="ltr">{{ site_settings.contact_phone }}</a></li>{% endif %}
         {% if site_settings.contact_email %}<li class="min-w-0"><a class="hover:text-white break-all" href="mailto:{{ site_settings.contact_email }}" dir="ltr">{{ site_settings.contact_email }}</a></li>{% endif %}

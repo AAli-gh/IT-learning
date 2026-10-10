@@ -5,6 +5,7 @@ from . import views
 app_name = "core"
 
 urlpatterns = [
+    path("contact/", views.contact, name="contact"),
     path("page/<str:slug>/", views.page_detail, name="page"),
     path("errors/<int:code>/", views.error_preview, name="error_preview"),
 ]

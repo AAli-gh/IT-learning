@@ -78,3 +78,21 @@ class SiteSettings(models.Model):
             obj, _ = cls.objects.get_or_create(pk=1)
             cache.set("site_settings", obj, 3600)
         return obj
+
+
+class ContactMessage(models.Model):
+    name = models.CharField("نام", max_length=120)
+    phone = models.CharField("شماره تماس", max_length=20, blank=True)
+    email = models.EmailField("ایمیل", blank=True)
+    subject = models.CharField("موضوع", max_length=150, blank=True)
+    message = models.TextField("پیام", max_length=3000)
+    is_read = models.BooleanField("خوانده شده", default=False)
+    created_at = models.DateTimeField("زمان", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "پیام تماس"
+        verbose_name_plural = "پیام‌های تماس"
+
+    def __str__(self):
+        return f"{self.name}: {self.subject or self.message[:30]}"

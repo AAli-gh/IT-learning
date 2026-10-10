@@ -8,12 +8,36 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 
+from django.contrib import messages
+from django.core.cache import cache
+
+from .forms import ContactForm
 from .models import Page
+from .notify import notify_staff
 
 
 def page_detail(request, slug):
     page = get_object_or_404(Page, slug=slug, is_published=True)
     return render(request, "core/page.html", {"page": page})
+
+
+def contact(request):
+    initial = {}
+    if request.user.is_authenticated:
+        initial = {"name": request.user.get_full_name(), "email": request.user.email, "phone": request.user.phone}
+    form = ContactForm(request.POST or None, initial=initial)
+    key = f"contact:{request.META.get('REMOTE_ADDR', '')}"
+    if request.method == "POST":
+        if cache.get(key, 0) >= 5:
+            return render(request, "429.html", status=429)
+        if form.is_valid():
+            msg = form.save()
+            cache.set(key, cache.get(key, 0) + 1, 3600)
+            notify_staff(f"پیام تماس جدید از {msg.name}",
+                         f"{msg.subject}\n\n{msg.message}\n\nتلفن: {msg.phone}\nایمیل: {msg.email}")
+            messages.success(request, "پیام شما ارسال شد؛ به‌زودی پاسخ می‌دهیم.")
+            return redirect("core:contact")
+    return render(request, "core/contact.html", {"form": form})
 
 
 @require_GET

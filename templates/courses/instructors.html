@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}مدرسان | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl sm:text-3xl font-extrabold mb-5">مدرسان آموزشگاه</h1>
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {% for p in people %}
+  <a href="{% url 'accounts:instructor' p.username %}" class="card p-5 flex items-center gap-4 hover:-translate-y-0.5 transition">
+    {% if p.avatar %}<img src="{{ p.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover">{% else %}<span class="grid place-items-center h-16 w-16 rounded-full bg-gradient-to-br from-brand-500 to-violet-600 text-white text-2xl font-black">{{ p.display_name|first }}</span>{% endif %}
+    <span><span class="block font-extrabold">{{ p.display_name }}</span><span class="block text-xs text-slate-500">{{ p.courses.all|length }} دوره</span>
+    {% if p.bio %}<span class="block text-sm text-slate-600 dark:text-slate-400 mt-1">{{ p.bio|truncatechars:70 }}</span>{% endif %}</span>
+  </a>
+  {% empty %}<p class="text-slate-500">هنوز مدرسی ثبت نشده است.</p>{% endfor %}
+</div>
+{% endblock %}

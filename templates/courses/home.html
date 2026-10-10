@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load school %}
 {% block content %}
 <section class="card !rounded-[2rem] p-8 sm:p-12 text-center">
   <h1 class="text-3xl sm:text-5xl font-black leading-[1.4]">مهارت‌های <span class="bg-gradient-to-l from-brand-500 to-violet-600 bg-clip-text text-transparent">IT</span> را حرفه‌ای یاد بگیرید</h1>
@@ -7,6 +8,12 @@
     <a href="{% url 'courses:list' %}" class="btn-primary">مشاهده دوره‌ها</a>
     <a href="{{ MAGAZINE_URL }}" class="btn-ghost" rel="noopener">📰 {{ MAGAZINE_NAME }}</a>
   </div>
+</section>
+
+<section class="mt-6 grid grid-cols-3 gap-3 text-center">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ stats.courses|fa_digits }}</p><p class="text-xs text-slate-500">دوره فعال</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ stats.students|fa_digits }}</p><p class="text-xs text-slate-500">دانشجو</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ stats.instructors|fa_digits }}</p><p class="text-xs text-slate-500">مدرس</p></div>
 </section>
 
 {% if home_categories %}
@@ -31,6 +38,22 @@
     {% for course in latest %}{% include "courses/partials/course_card.html" %}{% empty %}<p class="text-slate-500">هنوز دوره‌ای منتشر نشده است.</p>{% endfor %}
   </div>
 </section>
+
+<section class="mt-10">
+  <h2 class="section-title">چرا آموزشگاه ما؟</h2>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="card p-5"><p class="text-3xl">🛠️</p><h3 class="font-bold mt-2">پروژه‌محور</h3><p class="text-sm text-slate-600 dark:text-slate-400 leading-7 mt-1">هر دوره با پروژهٔ عملی تمام می‌شود تا مهارت واقعی بسازید.</p></div>
+    <div class="card p-5"><p class="text-3xl">👩‍🏫</p><h3 class="font-bold mt-2">مدرسان باتجربه</h3><p class="text-sm text-slate-600 dark:text-slate-400 leading-7 mt-1">آموزش از متخصصانی که در صنعت کار می‌کنند.</p></div>
+    <div class="card p-5"><p class="text-3xl">🤝</p><h3 class="font-bold mt-2">پشتیبانی</h3><p class="text-sm text-slate-600 dark:text-slate-400 leading-7 mt-1">پاسخ‌گویی به سؤالات حتی بعد از پایان دوره.</p></div>
+  </div>
+</section>
+
+{% if testimonials %}
+<section class="mt-10"><h2 class="section-title">نظر دانشجویان</h2>
+  <div class="grid gap-4 sm:grid-cols-3">{% for r in testimonials %}<div class="card p-5"><p class="text-amber-600 text-sm">{{ r.rating|fa_digits }} از ۵ ★</p><p class="mt-2 leading-7">{{ r.text|truncatechars:160 }}</p><p class="mt-3 text-xs text-slate-500">{{ r.user.display_name }} · {{ r.course.title }}</p></div>{% endfor %}</div></section>
+{% endif %}
+
+{% if faqs %}<section class="mt-10"><h2 class="section-title"><span>سؤالات متداول</span><a class="see-all" href="{% url 'courses:faq' %}">همه ←</a></h2>{% include "courses/partials/faq_list.html" %}</section>{% endif %}
 
 {% include "courses/partials/magazine_box.html" with title="تازه‌ترین مطالب مجله" %}
 {% endblock %}

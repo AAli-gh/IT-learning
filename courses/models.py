@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -92,6 +92,15 @@ class Course(SEOFields):
         return render_markdown(self.description)[0]
 
     @property
+    def approved_reviews(self):
+        return [r for r in self.reviews.all() if r.is_approved]
+
+    @property
+    def rating(self):
+        reviews = self.approved_reviews
+        return round(sum(r.rating for r in reviews) / len(reviews), 1) if reviews else None
+
+    @property
     def next_batch(self):
         """The earliest open batch that starts today or later."""
         today = timezone.localdate()
@@ -178,3 +187,43 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.full_name} — {self.course.title}"
+
+
+class Review(models.Model):
+    """Student review; only people with a confirmed enrollment can write one, and staff approve it."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reviews")
+    rating = models.PositiveSmallIntegerField("امتیاز", choices=[(i, str(i)) for i in range(1, 6)])
+    text = models.TextField("نظر", max_length=1000)
+    is_approved = models.BooleanField("تأیید شده", default=False)
+    is_featured = models.BooleanField("نمایش در صفحه اصلی", default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["course", "user"], name="one_review_per_user_course")]
+        verbose_name = "نظر"
+        verbose_name_plural = "نظرات دانشجویان"
+
+    def __str__(self):
+        return f"{self.user} → {self.course} ({self.rating})"
+
+
+class Faq(models.Model):
+    """Frequently asked question; ``course`` empty = general question."""
+
+    question = models.CharField("پرسش", max_length=250)
+    answer = models.TextField("پاسخ")
+    course = models.ForeignKey(Course, null=True, blank=True, on_delete=models.CASCADE, related_name="faqs",
+                               verbose_name="دوره (اختیاری)")
+    order = models.PositiveIntegerField("ترتیب", default=0)
+    is_published = models.BooleanField("منتشر شده", default=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "سؤال متداول"
+        verbose_name_plural = "سؤالات متداول"
+
+    def __str__(self):
+        return self.question

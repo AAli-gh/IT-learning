@@ -210,7 +210,7 @@ SITE_NAME_EN = "IT Academy"
 SITE_URL = os.environ.get("SITE_URL", "http://localhost:8000")
 SITE_DESCRIPTION = os.environ.get(
     "SITE_DESCRIPTION",
-    "مجله فناوری؛ مقالات، اخبار و آموزش‌های هوش مصنوعی، برنامه‌نویسی، توسعه وب، امنیت سایبری و دنیای IT",
+    "آموزشگاه فناوری؛ دوره‌های کاربردی برنامه‌نویسی، توسعه وب، شبکه، امنیت و هوش مصنوعی با پروژه عملی و مدرسان باتجربه",
 )
 
 # --- Uploads ---

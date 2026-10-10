@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from accounts.models import User
 from core.models import Page
-from courses.models import Batch, Category, Course, Topic
+from courses.models import Batch, Category, Course, Faq, Topic
 
 CATEGORIES = [
     ("برنامه‌نویسی", "programming", "💻"), ("توسعه وب", "web", "🌐"), ("شبکه", "network", "🔌"),
@@ -16,7 +16,7 @@ CATEGORIES = [
 
 PAGES = [
     ("درباره ما", "about", "## آموزشگاه فناوری\n\nآموزش کاربردی و پروژه‌محور فناوری اطلاعات، همراه با مجله تخصصی IT."),
-    ("تماس با ما", "contact", "برای مشاوره و ثبت‌نام با ما در تماس باشید."),
+    ("قوانین و مقررات", "terms", "## قوانین ثبت‌نام\n\nشرایط پرداخت، انصراف و حضور در کلاس‌ها در این صفحه توضیح داده می‌شود."),
 ]
 
 # (title, slug, category slug, level, price, hours, magazine tag, summary, topics)
@@ -39,6 +39,14 @@ DEMO = [
 ]
 
 
+FAQS = [
+    ("آیا برای شروع دوره‌ها به پیش‌زمینه نیاز است؟", "دوره‌های مقدماتی نیاز به پیش‌زمینه ندارند؛ پیش‌نیاز هر دوره در صفحهٔ آن آمده است."),
+    ("کلاس‌ها حضوری است یا آنلاین؟", "بسته به دورهٔ برگزاری، حضوری، آنلاین یا ترکیبی است؛ در صفحهٔ هر دوره مشخص شده."),
+    ("گواهی پایان دوره صادر می‌شود؟", "بله، پس از گذراندن دوره و پروژهٔ پایانی گواهی پایان دوره صادر می‌شود."),
+    ("روش پرداخت شهریه چگونه است؟", "پس از ثبت‌نام، همکاران ما برای هماهنگی پرداخت (نقدی یا اقساطی) با شما تماس می‌گیرند."),
+]
+
+
 class Command(BaseCommand):
     help = "Seed categories and pages; add sample courses with --demo."
 
@@ -50,6 +58,8 @@ class Command(BaseCommand):
             Category.objects.get_or_create(slug=slug, defaults={"name": name, "icon": icon, "order": order})
         for order, (title, slug, body) in enumerate(PAGES):
             Page.objects.get_or_create(slug=slug, defaults={"title": title, "body": body, "order": order})
+        for order, (q, a) in enumerate(FAQS):
+            Faq.objects.get_or_create(question=q, defaults={"answer": a, "order": order})
         if options["demo"]:
             teacher, _ = User.objects.get_or_create(
                 username="teacher", defaults={"first_name": "مدرس", "last_name": "نمونه", "is_instructor": True})

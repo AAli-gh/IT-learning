@@ -2,7 +2,7 @@ import re
 
 from django import forms
 
-from .models import Batch, Enrollment
+from .models import Batch, Enrollment, Review
 
 PHONE_RE = re.compile(r"^(\+98|0098|0)?9\d{9}$")
 _FA_TO_EN = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
@@ -42,3 +42,10 @@ class EnrollmentForm(forms.ModelForm):
         if batch and not batch.accepts_enrollment:
             raise forms.ValidationError("ظرفیت این دوره تکمیل شده است.")
         return batch
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ("rating", "text")
+        widgets = {"text": forms.Textarea(attrs={"rows": 3}), "rating": forms.RadioSelect}

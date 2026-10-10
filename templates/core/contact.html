@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}تماس با ما | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-4xl grid gap-6 md:grid-cols-[1fr_20rem]">
+  <section class="card p-6 sm:p-8">
+    <h1 class="text-2xl font-extrabold mb-4">تماس با ما</h1>
+    <form method="post" class="space-y-3">
+      {% include "partials/form.html" %}
+      <button class="btn-primary">ارسال پیام</button>
+    </form>
+  </section>
+  <aside class="space-y-3">
+    {% with s=site_settings %}
+    {% if s.contact_phone %}<a href="tel:{{ s.contact_phone }}" class="card p-4 flex items-center gap-3"><span class="text-2xl">📞</span><span><span class="block font-bold">تلفن</span><span class="block text-sm text-slate-500" dir="ltr">{{ s.contact_phone }}</span></span></a>{% endif %}
+    {% if s.contact_email %}<a href="mailto:{{ s.contact_email }}" class="card p-4 flex items-center gap-3"><span class="text-2xl">✉️</span><span><span class="block font-bold">ایمیل</span><span class="block text-sm text-slate-500 break-all" dir="ltr">{{ s.contact_email }}</span></span></a>{% endif %}
+    {% if s.address %}<div class="card p-4 flex items-center gap-3"><span class="text-2xl">📍</span><span><span class="block font-bold">آدرس</span><span class="block text-sm text-slate-500">{{ s.address }}</span></span></div>{% endif %}
+    {% if s.telegram_url %}<a href="{{ s.telegram_url }}" rel="noopener" target="_blank" class="card p-4 flex items-center gap-3"><span class="text-2xl">✈️</span><span class="font-bold">تلگرام</span></a>{% endif %}
+    {% if s.instagram_url %}<a href="{{ s.instagram_url }}" rel="noopener" target="_blank" class="card p-4 flex items-center gap-3"><span class="text-2xl">📷</span><span class="font-bold">اینستاگرام</span></a>{% endif %}
+    {% endwith %}
+  </aside>
+</div>
+{% endblock %}

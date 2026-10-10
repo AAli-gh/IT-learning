@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from .models import Page, SiteSettings
+from .models import ContactMessage, Page, SiteSettings
 
 
 @admin.register(Page)
@@ -40,3 +40,15 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         # head_scripts is injected unescaped, so only superusers may edit settings.
         return request.user.is_superuser
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ("name", "phone", "subject", "is_read", "created_at")
+    list_filter = ("is_read",)
+    list_editable = ("is_read",)
+    search_fields = ("name", "phone", "email", "message")
+    readonly_fields = ("name", "phone", "email", "subject", "message", "created_at")
+
+    def has_add_permission(self, request):
+        return False

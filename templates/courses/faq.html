@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}سؤالات متداول | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-3xl"><h1 class="text-2xl sm:text-3xl font-extrabold mb-5">سؤالات متداول</h1>
+  {% include "courses/partials/faq_list.html" %}
+  <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">پاسخ سؤال خود را پیدا نکردید؟ <a class="text-brand-600" href="{% url 'core:contact' %}">با ما تماس بگیرید.</a></p></div>
+{% endblock %}
