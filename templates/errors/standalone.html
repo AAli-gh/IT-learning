@@ -1,0 +1,31 @@
+{% load static %}<!doctype html>
+{# Used for 500/503/504: rendered without request context or database access, so keep it self-contained. #}
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="icon" href="{% static 'brand/favicon.ico' %}" sizes="any">
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script>
+    try {
+      const t = localStorage.getItem("theme");
+      if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.classList.add("dark");
+    } catch (e) {}
+  </script>
+</head>
+<body class="min-h-screen text-slate-800 dark:text-slate-200 font-sans antialiased">
+  <div class="site-bg" aria-hidden="true"></div>
+  <header class="glass !ring-0 border-b border-white/60 dark:border-white/10">
+    <div class="mx-auto max-w-7xl px-4 h-16 flex items-center">
+      <a href="/" class="flex items-center gap-2.5">
+        <span class="grid place-items-center h-10 w-10 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white font-black">IT</span>
+        <span class="text-lg font-black text-slate-900 dark:text-white">{{ SITE_NAME|default:"آموزشگاه فناوری" }}</span>
+      </a>
+    </div>
+  </header>
+  <main class="mx-auto max-w-7xl px-4 py-6">{% block content %}{% endblock %}</main>
+</body>
+</html>

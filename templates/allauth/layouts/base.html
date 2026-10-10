@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{% block head_title %}{% endblock head_title %} | {{ SITE_NAME }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% block extra_head %}{% endblock extra_head %}{% endblock %}
+{% block main %}
+<div class="mx-auto max-w-md card p-8 space-y-4 allauth">
+  {% block content %}{% endblock content %}
+</div>
+{% if user.is_authenticated %}
+<nav class="mx-auto max-w-md mt-4 flex flex-wrap gap-2 justify-center text-sm">
+  <a href="{% url 'accounts:profile' %}" class="chip">👤 پروفایل</a>
+  <a href="{% url 'account_email' %}" class="chip">✉️ ایمیل‌ها</a>
+  <a href="{% url 'account_change_password' %}" class="chip">🔑 تغییر رمز</a>
+  <a href="{% url 'mfa_index' %}" class="chip">🔐 ورود دومرحله‌ای</a>
+  <a href="{% url 'socialaccount_connections' %}" class="chip">🔗 حساب‌های متصل</a>
+</nav>
+{% endif %}
+{% endblock main %}
+{% block scripts %}{% block extra_body %}{% endblock extra_body %}{% endblock %}

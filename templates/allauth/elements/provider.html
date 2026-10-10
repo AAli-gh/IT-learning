@@ -1,0 +1,4 @@
+{% load allauth %}
+<a href="{{ attrs.href }}" title="{{ attrs.name }}" class="btn-ghost justify-center w-full">
+  {% if attrs.name == "GitHub" %}🐙{% elif attrs.name == "Google" %}🟦{% endif %} ورود با {{ attrs.name }}
+</a>

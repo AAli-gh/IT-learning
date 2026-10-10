@@ -1,0 +1,11 @@
+{% csrf_token %}
+{{ form.non_field_errors }}
+{% for field in form.visible_fields %}
+<div class="form-field{% if field.field.widget.attrs.class == "hp-field" %} hp-field{% endif %}">
+  {{ field.label_tag }}
+  {{ field }}
+  {% if field.help_text %}<div class="helptext">{{ field.help_text|safe }}</div>{% endif %}
+  {{ field.errors }}
+</div>
+{% endfor %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}

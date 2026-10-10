@@ -1,0 +1,50 @@
+<footer class="mt-12 bg-slate-950/80 dark:bg-slate-950/90 backdrop-blur-xl text-slate-300 border-t border-white/10">
+  <div class="mx-auto max-w-7xl px-4 py-10 grid gap-8 grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr] text-sm">
+    <div class="col-span-2 md:col-span-1">
+      <a href="{% url 'courses:home' %}" class="flex items-center gap-2.5 w-fit">
+        <span class="grid place-items-center h-10 w-10 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white font-black">IT</span>
+        <span class="leading-tight">
+          <span class="block text-lg font-black text-white">{{ SITE_NAME }}</span>
+          <span class="block text-[10px] font-semibold text-brand-500 tracking-[0.2em]" dir="ltr">IT ACADEMY</span>
+        </span>
+      </a>
+      <p class="mt-4 text-slate-400 leading-7">{{ SITE_DESCRIPTION }}</p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" rel="noopener" target="_blank" class="social" aria-label="اینستاگرام">IG</a>{% endif %}
+        {% if site_settings.telegram_url %}<a href="{{ site_settings.telegram_url }}" rel="noopener" target="_blank" class="social" aria-label="تلگرام">TG</a>{% endif %}
+        {% if site_settings.twitter_url %}<a href="{{ site_settings.twitter_url }}" rel="noopener" target="_blank" class="social" aria-label="ایکس">𝕏</a>{% endif %}
+        {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" rel="noopener" target="_blank" class="social" aria-label="لینکدین" dir="ltr">in</a>{% endif %}
+        {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" rel="noopener" target="_blank" class="social" aria-label="گیت‌هاب" dir="ltr">GH</a>{% endif %}
+      </div>
+    </div>
+
+    <div class="min-w-0">
+      <p class="font-bold text-white mb-3">درباره ما</p>
+      <ul class="space-y-2 text-slate-400">
+        {% for p in footer_pages %}<li><a class="hover:text-white" href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>{% endfor %}
+        {% if site_settings.contact_phone %}<li><a class="hover:text-white" href="tel:{{ site_settings.contact_phone }}" dir="ltr">{{ site_settings.contact_phone }}</a></li>{% endif %}
+        {% if site_settings.contact_email %}<li class="min-w-0"><a class="hover:text-white break-all" href="mailto:{{ site_settings.contact_email }}" dir="ltr">{{ site_settings.contact_email }}</a></li>{% endif %}
+      </ul>
+    </div>
+
+    <div class="min-w-0">
+      <p class="font-bold text-white mb-3">دسته‌بندی دوره‌ها</p>
+      <ul class="space-y-2 text-slate-400">
+        {% for cat in nav_categories|slice:":7" %}<li><a class="hover:text-white" href="{{ cat.get_absolute_url }}">{{ cat.name }}</a></li>{% endfor %}
+      </ul>
+    </div>
+
+    <div class="min-w-0">
+      <p class="font-bold text-white mb-3">{{ MAGAZINE_NAME }}</p>
+      <ul class="space-y-2 text-slate-400">
+        <li><a class="hover:text-white" href="{{ MAGAZINE_URL }}" rel="noopener">صفحه اصلی مجله</a></li>
+        <li><a class="hover:text-white" href="{{ MAGAZINE_URL }}/news/" rel="noopener">اخبار</a></li>
+        <li><a class="hover:text-white" href="{{ MAGAZINE_URL }}/articles/" rel="noopener">مقالات</a></li>
+        <li><a class="hover:text-white" href="{{ MAGAZINE_URL }}/tutorials/" rel="noopener">آموزش‌ها</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <p class="mx-auto max-w-7xl px-4 py-5 text-center text-xs text-slate-500">© {{ SITE_NAME }} — تمامی حقوق محفوظ است.</p>
+  </div>
+</footer>

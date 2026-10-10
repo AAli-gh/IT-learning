@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card !rounded-[2rem] p-8 sm:p-12 text-center">
+  <h1 class="text-3xl sm:text-5xl font-black leading-[1.4]">مهارت‌های <span class="bg-gradient-to-l from-brand-500 to-violet-600 bg-clip-text text-transparent">IT</span> را حرفه‌ای یاد بگیرید</h1>
+  <p class="mt-4 text-slate-600 dark:text-slate-300 leading-8 max-w-2xl mx-auto">دوره‌های کاربردی برنامه‌نویسی، وب، شبکه و امنیت؛ و برای یادگیری بیشتر، مطالب تخصصی {{ MAGAZINE_NAME }}.</p>
+  <div class="mt-6 flex flex-wrap justify-center gap-3">
+    <a href="{% url 'courses:list' %}" class="btn-primary">مشاهده دوره‌ها</a>
+    <a href="{{ MAGAZINE_URL }}" class="btn-ghost" rel="noopener">📰 {{ MAGAZINE_NAME }}</a>
+  </div>
+</section>
+
+{% if home_categories %}
+<section id="categories" class="mt-10">
+  <h2 class="section-title">دسته‌بندی دوره‌ها</h2>
+  <div class="flex flex-wrap gap-2">
+    {% for c in home_categories %}<a class="chip" href="{{ c.get_absolute_url }}">{{ c.icon }} {{ c.name }}</a>{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if featured %}
+<section class="mt-10">
+  <h2 class="section-title">دوره‌های ویژه</h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{% for course in featured %}{% include "courses/partials/course_card.html" %}{% endfor %}</div>
+</section>
+{% endif %}
+
+<section class="mt-10">
+  <h2 class="section-title"><span>تازه‌ترین دوره‌ها</span><a class="see-all" href="{% url 'courses:list' %}">همه دوره‌ها ←</a></h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for course in latest %}{% include "courses/partials/course_card.html" %}{% empty %}<p class="text-slate-500">هنوز دوره‌ای منتشر نشده است.</p>{% endfor %}
+  </div>
+</section>
+
+{% include "courses/partials/magazine_box.html" with title="تازه‌ترین مطالب مجله" %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "errors/layout.html" %}
+{% load static %}
+{% block error_title %}خطای داخلی سرور{% endblock %}
+{% block image %}{% static 'brand/500-robot.webp' %}{% endblock %}
+{% block image_alt %}رباتی که با آچار سرور خراب را تعمیر می‌کند{% endblock %}
+{% block image_position %}object-[30%_center]{% endblock %}
+{% block code %}500{% endblock %}
+{% block english %}Internal Server Error{% endblock %}
+{% block heading %}خطای <span class="bg-gradient-to-l from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">داخلی سرور</span>{% endblock %}
+{% block lead %}متأسفانه مشکلی در <span class="text-brand-500">سرورهای</span> ما به وجود آمده است.{% endblock %}
+{% block detail %}این خطا ثبت شده است و برای رفع آن بررسی می‌شود. لطفاً چند دقیقه بعد دوباره تلاش کنید.{% endblock %}
+{% block actions %}
+<a href="/" class="btn-primary !rounded-full !px-6 !py-2.5">🏠 صفحهٔ اصلی</a>
+<button type="button" onclick="location.reload()" class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">↻ تلاش دوباره</button>
+<button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')" class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">بازگشت به صفحهٔ قبل →</button>
+{% endblock %}
+{% block tiles %}{% endblock %}

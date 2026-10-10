@@ -1,0 +1,28 @@
+{% load allauth %}
+<div class="form-field">
+  {% if attrs.type == "checkbox" or attrs.type == "radio" %}
+    <label class="!flex items-center gap-2" for="{{ attrs.id }}">
+      <input {% if attrs.required %}required{% endif %} {% if attrs.checked %}checked{% endif %}
+             {% if attrs.name %}name="{{ attrs.name }}"{% endif %} {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+             {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %} type="{{ attrs.type }}" class="rounded">
+      {% slot label %}{% endslot %}
+    </label>
+  {% else %}
+    <label for="{{ attrs.id }}">{% slot label %}{% endslot %}</label>
+    {% if attrs.type == "textarea" %}
+      <textarea {% if attrs.required %}required{% endif %} {% if attrs.rows %}rows="{{ attrs.rows }}"{% endif %}
+                {% if attrs.name %}name="{{ attrs.name }}"{% endif %} {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+                {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}>{% slot value %}{% endslot %}</textarea>
+    {% else %}
+      <input {% if attrs.required %}required{% endif %} {% if attrs.disabled %}disabled{% endif %} {% if attrs.readonly %}readonly{% endif %}
+             {% if attrs.name %}name="{{ attrs.name }}"{% endif %} {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+             {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
+             {% if attrs.autocomplete %}autocomplete="{{ attrs.autocomplete }}"{% endif %}
+             {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
+             {% if attrs.type == "email" or attrs.type == "password" %}dir="ltr"{% endif %}
+             type="{{ attrs.type }}">
+    {% endif %}
+  {% endif %}
+  {% if slots.help_text %}<div class="helptext">{% slot help_text %}{% endslot %}</div>{% endif %}
+  {{ attrs.errors }}
+</div>

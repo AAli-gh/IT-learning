@@ -1,0 +1,39 @@
+# Development: PostgreSQL + Redis + the app with DEBUG on.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: itacademy
+      POSTGRES_USER: itacademy
+      POSTGRES_PASSWORD: itacademy
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:7-alpine
+
+  web:
+    build: .
+    command: sh -c "python manage.py migrate --noinput && python manage.py seed_school --demo && python manage.py runserver 0.0.0.0:8001"
+    environment:
+      DATABASE_URL: postgres://itacademy:itacademy@db:5432/itacademy
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "*"
+      # The magazine runs on its own port in development (its compose file uses 8000).
+      MAGAZINE_URL: ${MAGAZINE_URL:-http://host.docker.internal:8000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - media:/app/media
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  pgdata:
+  media:

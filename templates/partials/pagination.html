@@ -1,0 +1,8 @@
+{% load school %}
+{% if page_obj.has_other_pages %}
+<nav class="mt-8 flex items-center justify-center gap-2 text-sm" aria-label="صفحه‌بندی">
+  {% if page_obj.has_previous %}<a class="btn-ghost" href="?{% query_transform page=page_obj.previous_page_number %}">→ قبلی</a>{% endif %}
+  <span class="px-3 text-slate-500">صفحه {{ page_obj.number|fa_digits }} از {{ page_obj.paginator.num_pages|fa_digits }}</span>
+  {% if page_obj.has_next %}<a class="btn-ghost" href="?{% query_transform page=page_obj.next_page_number %}">بعدی ←</a>{% endif %}
+</nav>
+{% endif %}

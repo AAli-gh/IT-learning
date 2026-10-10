@@ -1,0 +1,6 @@
+{% load allauth %}
+<section class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 p-4 space-y-3">
+  {% if slots.title %}<h2 class="font-bold">{% slot title %}{% endslot %}</h2>{% endif %}
+  {% slot body %}{% endslot %}
+  {% if slots.actions %}<div class="flex flex-wrap gap-2">{% slot actions %}{% endslot %}</div>{% endif %}
+</section>

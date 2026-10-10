@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}صفحه پیدا نشد | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="card !rounded-[2rem] overflow-hidden grid lg:grid-cols-[1.05fr_1fr] my-4">
+  {# Illustration (first in RTL = right side) #}
+  <div class="relative min-h-[240px] sm:min-h-[340px] lg:min-h-[560px]">
+    <img src="{% static 'brand/404-robot.webp' %}" alt="ربات کوچکی که کنار تابلوی «404 - Page Not Found» نشسته است"
+         class="absolute inset-0 h-full w-full object-cover object-[70%_center]" width="882" height="831">
+    <div class="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-slate-950/40 lg:to-slate-950/60"></div>
+  </div>
+
+  <div class="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-slate-950/75 dark:bg-slate-950/80 backdrop-blur-xl text-white">
+    <span class="w-fit rounded-full bg-white/10 ring-1 ring-white/20 px-3 py-1 text-sm">خطای <span dir="ltr">404</span></span>
+    <h1 class="mt-5 text-3xl sm:text-4xl lg:text-[2.6rem] font-black leading-[1.5]">
+      صفحه مورد نظر <span class="bg-gradient-to-l from-brand-500 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">یافت نشد!</span>
+    </h1>
+    <p class="mt-4 text-white/75 leading-8">به نظر می‌رسد صفحه‌ای که به دنبال آن هستید وجود ندارد یا ممکن است حذف یا جابه‌جا شده باشد.</p>
+
+    <form action="{% url 'courses:list' %}" method="get" role="search" class="mt-7 relative">
+      <label class="sr-only" for="nf-q">جستجو</label>
+      <input id="nf-q" type="search" name="q" placeholder="جستجو در دوره‌ها..."
+             class="w-full rounded-full border-0 bg-white/10 ring-1 ring-white/20 py-3.5 pr-12 pl-16 text-white placeholder:text-white/50 focus:ring-2 focus:ring-brand-500">
+      <span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/60">🔍</span>
+      <button class="absolute left-1.5 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full bg-gradient-to-l from-brand-600 to-violet-600 hover:from-brand-700 hover:to-violet-700 text-lg" aria-label="جستجو">←</button>
+    </form>
+
+    <div class="mt-5 flex flex-wrap gap-3">
+      <a href="{% url 'courses:home' %}" class="btn-primary !rounded-full !px-6 !py-2.5">🏠 صفحه اصلی</a>
+      <button type="button" onclick="history.length > 1 ? history.back() : location.assign('{% url 'courses:home' %}')"
+              class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">بازگشت به صفحه قبل →</button>
+    </div>
+
+    <p class="mt-9 mb-3 font-bold">شاید به این بخش‌ها علاقه‌مند باشید</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <a href="{% url 'courses:list' %}?sort=new" class="nf-tile"><span class="nf-icon">📄</span>تازه‌ترین دوره‌ها</a>
+      <a href="{% url 'courses:list' %}?level=beginner" class="nf-tile"><span class="nf-icon">🎓</span>دوره‌های مقدماتی</a>
+      <a href="{% url 'courses:list' %}?sort=popular" class="nf-tile"><span class="nf-icon">🔥</span>پرطرفدارترین‌ها</a>
+      <a href="{% url 'courses:home' %}#categories" class="nf-tile"><span class="nf-icon">🗂️</span>دسته‌بندی‌ها</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

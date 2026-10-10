@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load school %}
+{% block title %}{{ course.meta_title|default:course.title }} | {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ course.meta_description|default:course.summary }}{% endblock %}
+{% block content %}
+<nav class="text-xs text-slate-500 mb-3"><a href="{% url 'courses:home' %}">خانه</a> ‹ <a href="{{ course.category.get_absolute_url }}">{{ course.category.name }}</a></nav>
+<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+  <article class="card p-6 sm:p-8">
+    <div class="flex items-center gap-2 text-xs mb-2"><span class="pill">{{ course.get_level_display }}</span><span class="text-slate-500">{{ course.category.name }}</span></div>
+    <h1 class="text-3xl font-extrabold leading-[1.5]">{{ course.title }}</h1>
+    <p class="mt-3 text-slate-600 dark:text-slate-300 leading-8">{{ course.summary }}</p>
+    <dl class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+      <div class="panel !p-3"><dt class="text-slate-500">شهریه</dt><dd class="font-bold">{{ course.price|toman }}</dd></div>
+      <div class="panel !p-3"><dt class="text-slate-500">مدت</dt><dd class="font-bold">{{ course.duration_hours|fa_digits }} ساعت</dd></div>
+      <div class="panel !p-3"><dt class="text-slate-500">مدرس</dt><dd class="font-bold">{% if course.instructor %}<a href="{% url 'accounts:instructor' course.instructor.username %}">{{ course.instructor.display_name }}</a>{% else %}—{% endif %}</dd></div>
+      <div class="panel !p-3"><dt class="text-slate-500">پیش‌نیاز</dt><dd class="font-bold">{{ course.prerequisites|default:"ندارد" }}</dd></div>
+    </dl>
+    {% if course.description %}<div class="prose prose-slate dark:prose-invert max-w-none leading-8 mt-6">{{ course.description_html|safe }}</div>{% endif %}
+    {% if course.topics.all %}
+    <h2 class="section-title mt-8">سرفصل‌ها</h2>
+    <ol class="space-y-2 list-decimal ps-6 leading-7">{% for t in course.topics.all %}<li>{{ t.title }}</li>{% endfor %}</ol>
+    {% endif %}
+    {% if course.batches.all %}
+    <h2 class="section-title mt-8">زمان برگزاری</h2>
+    <ul class="space-y-2">
+      {% for b in course.batches.all %}
+      <li class="panel !p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span class="font-bold">{{ b.title|default:"دوره" }} · {{ b.get_mode_display }}</span>
+        <span>شروع {{ b.start_date|jdate }}{% if b.schedule %} · {{ b.schedule }}{% endif %}</span>
+        <span class="{% if b.accepts_enrollment %}text-emerald-600{% else %}text-rose-600{% endif %}">{% if b.accepts_enrollment %}{{ b.seats_left|fa_digits }} جای خالی{% else %}تکمیل ظرفیت{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+
+  <aside class="lg:sticky lg:top-36 self-start card p-5" id="enroll-box">
+    <h2 class="font-extrabold mb-3">ثبت‌نام و مشاوره</h2>
+    {% include "courses/partials/enroll_form.html" %}
+  </aside>
+</div>
+
+{% include "courses/partials/magazine_box.html" with more_url=magazine_tag_url %}
+
+{% if related_courses %}
+<section class="mt-10">
+  <h2 class="section-title">دوره‌های مشابه</h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{% for course in related_courses %}{% include "courses/partials/course_card.html" %}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}

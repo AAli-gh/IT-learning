@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ person.display_name }} | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="card p-6 mb-6"><h1 class="text-2xl font-extrabold">{{ person.display_name }}</h1>
+  {% if person.bio %}<p class="mt-2 text-slate-600 dark:text-slate-300 leading-8">{{ person.bio }}</p>{% endif %}</div>
+<h2 class="section-title">دوره‌های این مدرس</h2>
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{% for course in courses %}{% include "courses/partials/course_card.html" %}{% endfor %}</div>
+{% endblock %}

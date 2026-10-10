@@ -1,0 +1,8 @@
+{% extends "account/email/base_message.html" %}
+{% block content %}
+<p>کسی (احتمالاً خودتان) تلاش کرد با ایمیل <b dir="ltr">{{ email }}</b> وارد حساب کاربری شود، اما حسابی با این ایمیل در سایت ما وجود ندارد.</p>
+<p>اگر خودتان بودید، می‌توانید ثبت‌نام کنید:</p>
+<p><a href="{{ signup_url }}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;border-radius:12px;text-decoration:none">ثبت‌نام</a></p>
+<p style="font-size:12px;color:#64748b">اگر دکمه کار نکرد، این لینک را در مرورگر باز کنید:<br><a href="{{ signup_url }}" dir="ltr" style="color:#64748b;word-break:break-all">{{ signup_url }}</a></p>
+<p style="font-size:13px;color:#64748b">اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.</p>
+{% endblock content %}

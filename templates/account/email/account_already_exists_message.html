@@ -1,0 +1,7 @@
+{% extends "account/email/base_message.html" %}
+{% block content %}
+<p>کسی (احتمالاً خودتان) تلاش کرد با ایمیل <b dir="ltr">{{ email }}</b> ثبت‌نام کند، اما حسابی با این ایمیل از قبل وجود دارد.</p>
+<p>اگر رمز عبورتان را فراموش کرده‌اید:</p>
+<p><a href="{{ password_reset_url }}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;border-radius:12px;text-decoration:none">بازیابی رمز عبور</a></p>
+<p style="font-size:12px;color:#64748b">اگر دکمه کار نکرد، این لینک را در مرورگر باز کنید:<br><a href="{{ password_reset_url }}" dir="ltr" style="color:#64748b;word-break:break-all">{{ password_reset_url }}</a></p>
+{% endblock content %}

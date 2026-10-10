@@ -1,0 +1,63 @@
+{% load static %}<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE_NAME }} | {{ SITE_NAME_EN }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ SITE_DESCRIPTION }}{% endblock %}">
+  <link rel="canonical" href="{{ SITE_URL }}{{ request.path }}">
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:locale" content="fa_IR">
+  <meta property="og:url" content="{{ SITE_URL }}{{ request.path }}">
+  {% block og %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ SITE_NAME }}">
+  <meta property="og:description" content="{{ SITE_DESCRIPTION }}">
+  <meta property="og:image" content="{% if site_settings.default_og_image %}{{ SITE_URL }}{{ site_settings.default_og_image.url }}{% else %}{{ SITE_URL }}{% static 'brand/og-default.jpg' %}{% endif %}">
+  {% endblock %}
+  <link rel="icon" href="{% static 'brand/favicon.ico' %}" sizes="any">
+  <link rel="icon" href="{% static 'brand/logo.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
+  <meta name="theme-color" content="#2563eb">
+  
+
+  <script>
+    // Apply saved theme before paint to avoid a flash.
+    try {
+      const t = localStorage.getItem("theme");
+      if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    } catch (e) {}
+  </script>
+  <link rel="preload" href="{% static 'vendor/vazirmatn/Vazirmatn-Variable.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <link rel="stylesheet" href="{% static 'css/code.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head %}{% endblock %}
+  {% if site_settings.head_scripts %}{{ site_settings.head_scripts|safe }}{% endif %}
+</head>
+<body class="min-h-screen text-slate-800 dark:text-slate-200 font-sans antialiased"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div class="site-bg" aria-hidden="true"></div>
+  {% include "partials/header.html" %}
+
+  {% if messages %}
+  <div class="mx-auto max-w-7xl px-4 mt-4 space-y-2">
+    {% for message in messages %}
+    <div class="rounded-2xl glass !bg-emerald-50/80 dark:!bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-4 py-3 text-sm">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="mx-auto max-w-7xl px-4 py-6">
+    {% block main %}{% block content %}{% endblock %}{% endblock %}
+  </main>
+
+  {% include "partials/footer.html" %}
+
+  <script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

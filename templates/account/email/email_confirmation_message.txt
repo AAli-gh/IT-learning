@@ -1,0 +1,12 @@
+{% extends "account/email/base_message.txt" %}
+{% block content %}{% autoescape off %}{% load account %}{% user_display user as user_display %}کاربر «{{ user_display }}» با این آدرس ایمیل در سایت ما حساب ساخته است.
+
+{% if code %}کد تأیید ایمیل شما:
+
+{{ code }}
+
+این کد را در صفحهٔ باز سایت وارد کنید.{% else %}برای تأیید ایمیل روی لینک زیر بزنید:
+
+{{ activate_url }}{% endif %}
+
+اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.{% endautoescape %}{% endblock content %}

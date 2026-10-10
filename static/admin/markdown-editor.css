@@ -1,0 +1,24 @@
+.md-editor { width: 100%; max-width: 100%; }
+.md-toolbar { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 6px; }
+.md-toolbar button, .md-upload { border: 1px solid var(--border-color, #ccc); background: var(--body-bg, #fff); color: var(--body-fg, #333);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
+.md-toolbar button:hover, .md-upload:hover { background: var(--darkened-bg, #f8f8f8); }
+.md-toggle { margin-inline-start: auto; }
+.md-status { font-size: 12px; color: var(--body-quiet-color, #666); }
+.md-panes { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.md-panes.split { grid-template-columns: 1fr 1fr; }
+.md-panes textarea { width: 100% !important; box-sizing: border-box; font-family: ui-monospace, monospace; font-size: 14px; line-height: 1.7; min-height: 480px; }
+.md-preview { border: 1px solid var(--border-color, #ccc); border-radius: 8px; padding: 16px 20px; overflow: auto; max-height: 720px;
+  line-height: 2; font-size: 15px; background: var(--body-bg, #fff); }
+.md-preview img { max-width: 100%; border-radius: 8px; }
+.md-preview pre { direction: ltr; text-align: left; padding: 12px; border-radius: 8px; overflow-x: auto; }
+.md-preview table { border-collapse: collapse; } .md-preview td, .md-preview th { border: 1px solid var(--border-color, #ccc); padding: 4px 8px; }
+@media (max-width: 1024px) { .md-panes.split { grid-template-columns: 1fr; } }
+
+/* Undo Django admin styles that leak into the editor */
+.md-toolbar label.md-upload { width: auto; float: none; min-width: 0; display: inline-flex; align-items: center; gap: 4px; font-weight: normal; }
+.md-preview h1, .md-preview h2, .md-preview h3, .md-preview h4 { background: none; color: inherit; padding: 0; margin: 1em 0 .5em;
+  text-transform: none; letter-spacing: 0; font-weight: 700; }
+.md-preview h2 { font-size: 1.35em; } .md-preview h3 { font-size: 1.15em; }
+.md-preview p, .md-preview li { font-size: 15px; }
+.md-preview ul { list-style: disc; padding-inline-start: 1.5em; } .md-preview ul li { list-style: disc; }

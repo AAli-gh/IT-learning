@@ -1,0 +1,11 @@
+{% extends "account/email/base_message.html" %}
+{% block content %}
+<p>این ایمیل را دریافت کرده‌اید چون تغییر زیر در حساب کاربری شما انجام شد:</p>
+<p style="font-weight:700">{% block notification_message %}{% endblock notification_message %}</p>
+<p>اگر این تغییر کار شما نبوده، فوراً رمز عبورتان را عوض کنید. جزئیات درخواست:</p>
+<ul style="font-size:13px;color:#475569;padding-right:20px">
+  <li>آدرس IP: <span dir="ltr">{{ ip }}</span></li>
+  <li>مرورگر: <span dir="ltr">{{ user_agent }}</span></li>
+  <li>زمان: <span dir="ltr">{{ timestamp }}</span></li>
+</ul>
+{% endblock %}

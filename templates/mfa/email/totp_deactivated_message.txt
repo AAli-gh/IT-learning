@@ -1,0 +1,2 @@
+{% extends "account/email/base_notification.txt" %}
+{% block notification_message %}ورود دومرحله‌ای با برنامهٔ احراز هویت برای حساب شما غیرفعال شد.{% endblock notification_message %}

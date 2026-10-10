@@ -1,0 +1,16 @@
+{# Articles from the sister site (IT Magazine). Renders nothing when the magazine is unreachable. #}
+{% if articles %}
+<section class="mt-10">
+  <h2 class="section-title"><span>📰 {{ title|default:"مطالب مرتبط در مجله" }}</span>
+    <a class="see-all" href="{{ more_url|default:MAGAZINE_URL }}" rel="noopener">مشاهده در مجله ←</a></h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for a in articles %}
+    <a href="{{ a.url }}" rel="noopener" class="card p-4 flex flex-col gap-2 hover:-translate-y-0.5 transition">
+      <h3 class="font-bold leading-7">{{ a.display_title|default:a.title }}</h3>
+      {% if a.excerpt %}<p class="text-sm text-slate-600 dark:text-slate-400 leading-6">{{ a.excerpt|truncatechars:120 }}</p>{% endif %}
+      <span class="mt-auto text-xs text-slate-500">{{ a.category.name }}{% if a.reading_time %} · {{ a.reading_time }} دقیقه مطالعه{% endif %}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

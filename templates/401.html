@@ -1,0 +1,27 @@
+{% extends "errors/layout.html" %}
+{% load static %}
+{% block error_title %}نیاز به ورود{% endblock %}
+{% block image %}{% static 'brand/401-robot.webp' %}{% endblock %}
+{% block image_alt %}ربات جلوی دری قفل‌شده با فرم ورود ایستاده است{% endblock %}
+{% block image_position %}object-[35%_center]{% endblock %}
+{% block code %}401{% endblock %}
+{% block english %}Unauthorized{% endblock %}
+{% block heading %}نیاز به <span class="bg-gradient-to-l from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">ورود</span>{% endblock %}
+{% block lead %}برای مشاهدهٔ این صفحه ابتدا باید وارد حساب کاربری خود شوید.{% endblock %}
+{% block detail %}اگر حساب کاربری ندارید، می‌توانید به‌راحتی ثبت‌نام کنید.{% endblock %}
+{% block extra %}
+<form action="{% url 'courses:list' %}" method="get" role="search" class="mt-7 relative">
+  <label class="sr-only" for="err-q">جستجو</label>
+  <input id="err-q" type="search" name="q" placeholder="جستجو در دوره‌ها..."
+         class="w-full rounded-full border-0 bg-white/10 ring-1 ring-white/20 py-3.5 pr-12 pl-16 text-white placeholder:text-white/50 focus:ring-2 focus:ring-brand-500">
+  <span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/60">🔍</span>
+  <button class="absolute left-1.5 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full bg-gradient-to-l from-brand-600 to-violet-600 hover:from-brand-700 hover:to-violet-700 text-lg" aria-label="جستجو">←</button>
+</form>
+{% endblock %}
+{% block actions %}
+<a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn-primary !rounded-full !px-6 !py-2.5">👤 ورود به حساب کاربری</a>
+<button type="button" onclick="history.length > 1 ? history.back() : location.assign('{% url 'courses:home' %}')"
+        class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">بازگشت به صفحهٔ قبل →</button>
+<span class="w-full text-center text-sm text-white/60">یا</span>
+<a href="{% url 'account_signup' %}" class="btn !rounded-full !px-6 !py-2.5 bg-white/10 ring-1 ring-white/20 hover:bg-white/20 mx-auto">➕ ثبت‌نام در {{ SITE_NAME }}</a>
+{% endblock %}

@@ -1,0 +1,5 @@
+<form id="enroll-form" method="post" action="{% url 'courses:enroll' course.slug %}" class="space-y-3"
+      hx-post="{% url 'courses:enroll' course.slug %}" hx-target="#enroll-box" hx-swap="innerHTML">
+  {% include "partials/form.html" %}
+  <button class="btn-primary w-full justify-center">ثبت‌نام / درخواست مشاوره</button>
+</form>

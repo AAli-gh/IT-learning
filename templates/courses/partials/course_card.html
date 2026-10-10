@@ -1,0 +1,18 @@
+{% load school %}
+<a href="{{ course.get_absolute_url }}" class="card overflow-hidden flex flex-col hover:-translate-y-0.5 transition">
+  <div class="aspect-[16/9] bg-gradient-to-br from-brand-500/30 to-violet-600/30 grid place-items-center text-5xl">
+    {% if course.cover %}<img src="{{ course.cover.url }}" alt="" loading="lazy" class="h-full w-full object-cover">{% else %}{{ course.category.icon|default:"🎓" }}{% endif %}
+  </div>
+  <div class="p-4 flex flex-col gap-2 flex-1">
+    <div class="flex items-center gap-2 text-xs">
+      <span class="pill">{{ course.get_level_display }}</span>
+      <span class="text-slate-500">{{ course.category.name }}</span>
+    </div>
+    <h3 class="font-extrabold leading-7">{{ course.title }}</h3>
+    <p class="text-sm text-slate-600 dark:text-slate-400 leading-6">{{ course.summary }}</p>
+    <div class="mt-auto pt-2 flex items-center justify-between text-sm">
+      <span class="text-slate-500">{% if course.duration_hours %}{{ course.duration_hours|fa_digits }} ساعت{% endif %}</span>
+      <span class="font-bold text-brand-700 dark:text-brand-500">{{ course.price|toman }}</span>
+    </div>
+  </div>
+</a>

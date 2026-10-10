@@ -1,0 +1,44 @@
+{% extends "errors/layout.html" %}
+{% load static %}
+{% block error_title %}درخواست‌های بیش از حد{% endblock %}
+{% block image %}{% static 'brand/429-robot.webp' %}{% endblock %}
+{% block image_alt %}رباتی کنار صفی طولانی از درخواست‌ها{% endblock %}
+{% block image_position %}object-top{% endblock %}
+{% block code %}429{% endblock %}
+{% block english %}Too Many Requests{% endblock %}
+{% block heading %}درخواست‌های <span class="bg-gradient-to-l from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">بیش از حد</span>{% endblock %}
+{% block lead %}شما در مدت زمان کوتاهی تعداد زیادی درخواست ارسال کرده‌اید.{% endblock %}
+{% block detail %}لطفاً کمی صبر کنید و چند لحظه دیگر دوباره تلاش کنید.{% endblock %}
+{% block extra %}
+{# Counts down from Retry-After (default 60s), then offers a reload. #}
+<div class="mt-7 flex items-center gap-4 rounded-full bg-white/10 ring-1 ring-white/20 p-2 pr-5" data-retry="{{ retry_after|default:60 }}">
+  <span class="text-2xl" aria-hidden="true">⏱️</span>
+  <p class="flex-1 text-sm text-white/85" aria-live="polite" data-retry-text>لطفاً <b data-retry-seconds>{{ retry_after|default:60 }}</b> ثانیهٔ دیگر دوباره تلاش کنید.</p>
+  <div class="relative grid place-items-center h-16 w-16 shrink-0">
+    <svg viewBox="0 0 36 36" class="absolute inset-0 -rotate-90"><circle cx="18" cy="18" r="16" fill="none" stroke="rgb(255 255 255 / .15)" stroke-width="3"/>
+      <circle cx="18" cy="18" r="16" fill="none" stroke="url(#retry-g)" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0" data-retry-ring/>
+      <defs><linearGradient id="retry-g"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+    <span class="text-lg font-black" data-retry-seconds>{{ retry_after|default:60 }}</span>
+  </div>
+</div>
+<script>
+  (() => {
+    const box = document.querySelector("[data-retry]");
+    const total = Math.max(1, parseInt(box.dataset.retry, 10) || 60);
+    const ring = box.querySelector("[data-retry-ring]");
+    let left = total;
+    const fa = (n) => String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+    const tick = () => {
+      box.querySelectorAll("[data-retry-seconds]").forEach((el) => (el.textContent = fa(left)));
+      ring.setAttribute("stroke-dashoffset", String(100 - (left / total) * 100));
+      if (left <= 0) {
+        clearInterval(timer);
+        box.querySelector("[data-retry-text]").innerHTML = 'اکنون می‌توانید دوباره تلاش کنید. <button type="button" class="underline font-bold" onclick="location.reload()">تلاش دوباره</button>';
+      }
+      left -= 1;
+    };
+    const timer = setInterval(tick, 1000);
+    tick();
+  })();
+</script>
+{% endblock %}

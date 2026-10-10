@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ page.meta_title|default:page.title }} | {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:SITE_DESCRIPTION }}{% endblock %}
+{% block content %}
+<article class="mx-auto max-w-3xl card p-8">
+  <h1 class="text-3xl font-extrabold mb-6">{{ page.title }}</h1>
+  <div class="prose prose-slate dark:prose-invert max-w-none leading-8">{{ page.body_html|safe }}</div>
+  {% if page.slug == "contact" %}
+  {% with s=site_settings %}
+  <div class="mt-8 grid gap-3 sm:grid-cols-2">
+    {% if s.contact_phone %}<a href="tel:{{ s.contact_phone }}" class="card p-4 flex items-center gap-3"><span class="text-2xl">📞</span><span><span class="block font-bold">تلفن</span><span class="block text-sm text-slate-500" dir="ltr">{{ s.contact_phone }}</span></span></a>{% endif %}
+    {% if s.contact_email %}<a href="mailto:{{ s.contact_email }}" class="card p-4 flex items-center gap-3"><span class="text-2xl">✉️</span><span><span class="block font-bold">ایمیل</span><span class="block text-sm text-slate-500" dir="ltr">{{ s.contact_email }}</span></span></a>{% endif %}
+    {% if s.address %}<div class="card p-4 flex items-center gap-3 sm:col-span-2"><span class="text-2xl">📍</span><span><span class="block font-bold">آدرس</span><span class="block text-sm text-slate-500">{{ s.address }}</span></span></div>{% endif %}
+  </div>
+  {% endwith %}
+  {% endif %}
+</article>
+{% endblock %}

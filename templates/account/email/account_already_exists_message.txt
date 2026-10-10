@@ -1,0 +1,5 @@
+{% extends "account/email/base_message.txt" %}
+{% block content %}{% autoescape off %}کسی (احتمالاً خودتان) تلاش کرد با ایمیل {{ email }} ثبت‌نام کند، اما حسابی با این ایمیل از قبل وجود دارد.
+اگر رمز عبورتان را فراموش کرده‌اید، از این لینک آن را بازیابی کنید:
+
+{{ password_reset_url }}{% endautoescape %}{% endblock content %}

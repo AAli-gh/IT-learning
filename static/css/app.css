@@ -1,0 +1,36 @@
+/* Site-wide tweaks on top of Tailwind. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Code is always left-to-right, even inside RTL articles. */
+.article-body pre, .article-body code, .highlight { direction: ltr; text-align: left; }
+.article-body .highlight { position: relative; border-radius: 0.75rem; margin: 1.5rem 0; }
+.article-body .highlight pre { margin: 0; background: transparent; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.875rem; line-height: 1.7; }
+.article-body :not(pre) > code { background: rgb(148 163 184 / 0.2); padding: 0.1rem 0.4rem; border-radius: 0.35rem; font-weight: 500; }
+.article-body :not(pre) > code::before, .article-body :not(pre) > code::after { content: none; }
+
+.copy-btn {
+  position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.75rem; padding: 0.2rem 0.6rem;
+  border-radius: 0.5rem; background: rgb(255 255 255 / 0.1); color: #e2e8f0; opacity: 0; transition: opacity .15s;
+}
+.highlight:hover .copy-btn, .copy-btn:focus { opacity: 1; }
+
+[data-toc] a.active { color: rgb(37 99 235); font-weight: 600; }
+.htmx-request { opacity: .6; transition: opacity .2s; }
+/* Honeypot: invisible without off-screen offsets (a large left offset widens RTL pages) */
+.hp-field { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; border: 0 !important;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0; pointer-events: none; }
+
+/* Fixed, pre-blurred photo behind every page (static/brand/bg.webp), washed lighter or darker per theme. */
+body { background: #d9d6f5; }
+.dark body { background: #020617; }
+.site-bg { position: fixed; inset: 0; z-index: -1; background: url("../brand/bg.webp") center / cover no-repeat; }
+.site-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(255 255 255 / 0.30), rgb(238 242 255 / 0.45)); }
+.dark .site-bg::after { background: linear-gradient(180deg, rgb(2 6 23 / 0.78), rgb(15 23 42 / 0.88)); }
+
+/* Hero slider */
+[data-slider] [data-slide] { opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }
+[data-slider] [data-slide].is-active { opacity: 1; visibility: visible; }
+[data-slider] [data-dot].is-active { width: 1.5rem; background: #fff; }
+.snap-row { scroll-snap-type: x mandatory; }
+.snap-row > * { scroll-snap-align: start; }

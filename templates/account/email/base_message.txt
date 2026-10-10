@@ -1,0 +1,7 @@
+{% autoescape off %}سلام از {{ SITE_NAME|default:"آموزشگاه فناوری" }}!
+
+{% block content %}{% endblock content %}
+
+با سپاس از همراهی شما
+{{ SITE_NAME|default:"آموزشگاه فناوری" }}
+{% endautoescape %}

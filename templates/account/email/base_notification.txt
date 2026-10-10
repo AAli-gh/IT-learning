@@ -1,0 +1,10 @@
+{% extends "account/email/base_message.txt" %}
+{% block content %}{% autoescape off %}این ایمیل را دریافت کرده‌اید چون تغییر زیر در حساب کاربری شما انجام شد:
+
+{% block notification_message %}{% endblock notification_message %}
+
+اگر این تغییر کار شما نبوده، فوراً رمز عبورتان را عوض کنید. جزئیات درخواست:
+
+- آدرس IP: {{ ip }}
+- مرورگر: {{ user_agent }}
+- زمان: {{ timestamp }}{% endautoescape %}{% endblock %}

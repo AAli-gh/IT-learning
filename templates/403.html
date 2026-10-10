@@ -1,0 +1,20 @@
+{% extends "errors/layout.html" %}
+{% load static %}
+{% block error_title %}دسترسی ممنوع{% endblock %}
+{% block image %}{% static 'brand/403-robot.webp' %}{% endblock %}
+{% block image_alt %}رباتی که جلوی دری قفل‌شده با دست علامت توقف می‌دهد{% endblock %}
+{% block image_position %}object-[40%_center]{% endblock %}
+{% block code %}403{% endblock %}
+{% block english %}Forbidden{% endblock %}
+{% block heading %}دسترسی <span class="bg-gradient-to-l from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">ممنوع</span>{% endblock %}
+{% block lead %}متأسفانه شما اجازهٔ دسترسی به این صفحه را ندارید.{% endblock %}
+{% block detail %}{% if user.is_authenticated %}این بخش فقط برای کاربرانی با دسترسی مشخص فعال است.{% else %}این بخش محدود شده است یا برای دیدن آن باید وارد حساب کاربری خود شوید.{% endif %}{% endblock %}
+{% block actions %}
+<a href="{% url 'courses:home' %}" class="btn-primary !rounded-full !px-6 !py-2.5">🏠 بازگشت به صفحهٔ اصلی</a>
+{% if user.is_authenticated %}
+<button type="button" onclick="history.length > 1 ? history.back() : location.assign('{% url 'courses:home' %}')"
+        class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">بازگشت به صفحهٔ قبل →</button>
+{% else %}
+<a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">👤 ورود به حساب کاربری</a>
+{% endif %}
+{% endblock %}

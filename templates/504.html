@@ -1,0 +1,17 @@
+{% extends "errors/layout.html" %}
+{% load static %}
+{% block error_title %}زمان انتظار به پایان رسید{% endblock %}
+{% block image %}{% static 'brand/504-robot.webp' %}{% endblock %}
+{% block image_alt %}رباتی میان دو سرور که اتصال بینشان قطع شده است{% endblock %}
+{% block image_position %}object-[25%_center]{% endblock %}
+{% block code %}504{% endblock %}
+{% block english %}Gateway Timeout{% endblock %}
+{% block heading %}زمان انتظار به <span class="bg-gradient-to-l from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">پایان رسید</span>{% endblock %}
+{% block lead %}سرور مقصد در زمان مقرر پاسخی ارسال نکرده است.{% endblock %}
+{% block detail %}ممکن است سرور موقتاً در دسترس نباشد یا پردازش درخواست بیش از حد طول کشیده باشد. لطفاً چند لحظه دیگر دوباره تلاش کنید.{% endblock %}
+{% block actions %}
+<a href="/" class="btn-primary !rounded-full !px-6 !py-2.5">🏠 صفحهٔ اصلی</a>
+<button type="button" onclick="location.reload()" class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">↻ تلاش دوباره</button>
+<button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')" class="btn !rounded-full !px-6 !py-2.5 ring-1 ring-white/30 hover:bg-white/10">بازگشت به صفحهٔ قبل →</button>
+{% endblock %}
+{% block tiles %}{% endblock %}

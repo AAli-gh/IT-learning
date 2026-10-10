@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{% if category %}دوره‌های {{ category.name }}{% else %}همه دوره‌ها{% endif %} | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl sm:text-3xl font-extrabold mb-1">{% if category %}{{ category.icon }} دوره‌های {{ category.name }}{% else %}همه دوره‌ها{% endif %}</h1>
+{% if category.description %}<p class="text-slate-600 dark:text-slate-400 mb-4">{{ category.description }}</p>{% endif %}
+
+<form method="get" class="panel my-5 grid gap-3 sm:grid-cols-5 items-end form-field">
+  <div class="sm:col-span-2"><label for="f-q">جستجو</label><input id="f-q" type="search" name="q" value="{{ q }}" placeholder="مثلاً پایتون"></div>
+  <div><label for="f-level">سطح</label>
+    <select id="f-level" name="level"><option value="">همه</option>{% for v, l in levels %}<option value="{{ v }}" {% if current.level == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div><label for="f-mode">نحوه برگزاری</label>
+    <select id="f-mode" name="mode"><option value="">همه</option>{% for v, l in modes %}<option value="{{ v }}" {% if current.mode == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="flex gap-2"><select name="sort" aria-label="مرتب‌سازی">
+      <option value="">پیش‌فرض</option><option value="new" {% if current.sort == "new" %}selected{% endif %}>جدیدترین</option>
+      <option value="price" {% if current.sort == "price" %}selected{% endif %}>ارزان‌ترین</option>
+      <option value="duration" {% if current.sort == "duration" %}selected{% endif %}>کوتاه‌ترین</option></select>
+    <button class="btn-primary">اعمال</button></div>
+</form>
+
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {% for course in page_obj %}{% include "courses/partials/course_card.html" %}{% empty %}<p class="text-slate-500">دوره‌ای پیدا نشد.</p>{% endfor %}
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}
