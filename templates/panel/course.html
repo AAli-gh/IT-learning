@@ -1,0 +1,26 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<nav class="text-xs text-slate-500 mb-2"><a href="{% url 'panel:courses' %}">دوره‌های من</a> ‹ {{ course.title }}</nav>
+<h1 class="text-2xl font-extrabold">{{ course.title }}</h1>
+<div class="my-3">{% include "panel/partials/progress.html" %}<p class="text-xs text-slate-500 mt-1">{{ percent|fa_digits }}٪ تکمیل</p></div>
+
+{% if announcements %}<div class="space-y-2 mb-6">{% for a in announcements %}<div class="panel !p-3 text-sm"><p class="font-bold">📢 {{ a.title }}</p><p class="mt-1 leading-7">{{ a.body|linebreaksbr }}</p></div>{% endfor %}</div>{% endif %}
+
+<h2 class="section-title">درس‌ها</h2>
+<ol class="space-y-2 mb-6">
+  {% for l in lessons %}
+  <li><a href="{% url 'panel:lesson' course.slug l.pk %}" class="panel !p-3 flex items-center gap-3 hover:bg-white/80 dark:hover:bg-slate-800/80">
+    <span class="grid place-items-center h-7 w-7 rounded-full text-xs font-bold {% if l.pk in done %}bg-emerald-600 text-white{% else %}bg-slate-200 dark:bg-slate-700{% endif %}">{% if l.pk in done %}✓{% else %}{{ forloop.counter|fa_digits }}{% endif %}</span>
+    <span class="flex-1 font-medium">{{ l.title }}</span>
+    <span class="text-xs text-slate-500">{% if l.duration_minutes %}{{ l.duration_minutes|fa_digits }} دقیقه{% endif %}{% if l.attachment %} · 📎{% endif %}</span>
+  </a></li>
+  {% empty %}<li class="text-slate-500 text-sm">محتوای این دوره هنوز اضافه نشده است.</li>{% endfor %}
+</ol>
+
+<h2 class="section-title">جلسات کلاس</h2>
+<ul class="space-y-2">
+  {% for s in sessions %}<li class="panel !p-3 text-sm flex flex-wrap justify-between gap-2"><span class="font-bold">{{ s.title }}</span><span class="text-slate-500">{{ s.starts_at|jdate:"%d %B ساعت %H:%M" }}{% if s.place %} · {{ s.place }}{% endif %}</span>{% if s.recording_url %}<a class="text-brand-600" href="{{ s.recording_url }}" rel="noopener" target="_blank">ضبط جلسه</a>{% endif %}</li>
+  {% empty %}<li class="text-slate-500 text-sm">جلسه‌ای ثبت نشده است.</li>{% endfor %}
+</ul>
+{% endblock %}

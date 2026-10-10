@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --chown=app:app . .
 COPY --from=assets --chown=app:app /app/static ./static
 RUN DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput \
-    && mkdir -p /app/media && chown app:app /app/media /app/staticfiles
+    && mkdir -p /app/media /app/private_media && chown app:app /app/media /app/private_media /app/staticfiles
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"

@@ -1,0 +1,41 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<h1 class="text-2xl font-extrabold mb-4">داشبورد</h1>
+
+{% if pending %}
+<div class="rounded-2xl glass !bg-amber-50/80 dark:!bg-amber-900/40 text-amber-900 dark:text-amber-100 px-4 py-3 text-sm mb-4">
+  ⏳ ثبت‌نام شما برای {% for e in pending %}«{{ e.course.title }}»{% if not forloop.last %}، {% endif %}{% endfor %} در انتظار تأیید است؛ پس از تماس همکاران ما، محتوای دوره باز می‌شود.
+</div>
+{% endif %}
+
+<div class="grid grid-cols-3 gap-3 text-center mb-6">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ courses|length|fa_digits }}</p><p class="text-xs text-slate-500">دوره فعال</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ done_lessons|fa_digits }}</p><p class="text-xs text-slate-500">درس انجام‌شده</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ upcoming|length|fa_digits }}</p><p class="text-xs text-slate-500">کلاس پیش‌رو</p></div>
+</div>
+
+<h2 class="section-title"><span>ادامهٔ یادگیری</span><a class="see-all" href="{% url 'panel:courses' %}">همه ←</a></h2>
+<div class="grid gap-3 sm:grid-cols-2 mb-6">
+  {% for c in courses %}
+  <a href="{% url 'panel:course' c.course.slug %}" class="card p-4 space-y-2 hover:-translate-y-0.5 transition">
+    <p class="font-bold">{{ c.course.title }}</p>
+    {% include "panel/partials/progress.html" with percent=c.percent %}
+    <p class="text-xs text-slate-500">{{ c.percent|fa_digits }}٪ تکمیل</p>
+  </a>
+  {% empty %}<p class="text-slate-500 text-sm">هنوز دورهٔ فعالی ندارید. <a class="text-brand-600" href="{% url 'courses:list' %}">مشاهدهٔ دوره‌ها</a></p>{% endfor %}
+</div>
+
+<div class="grid gap-6 md:grid-cols-2">
+  <div><h2 class="section-title">کلاس‌های پیش‌رو</h2>
+    <ul class="space-y-2">
+      {% for s in upcoming %}<li class="panel !p-3 text-sm"><p class="font-bold">{{ s.title }}</p><p class="text-slate-500">{{ s.batch.course.title }} · {{ s.starts_at|jdate:"%d %B ساعت %H:%M" }}</p>{% if s.place %}<p class="text-slate-500">{{ s.place }}</p>{% endif %}</li>
+      {% empty %}<li class="text-slate-500 text-sm">جلسه‌ای برنامه‌ریزی نشده است.</li>{% endfor %}
+    </ul></div>
+  <div><h2 class="section-title"><span>اطلاعیه‌ها</span><a class="see-all" href="{% url 'panel:announcements' %}">همه ←</a></h2>
+    <ul class="space-y-2">
+      {% for a in announcements %}<li class="panel !p-3 text-sm"><p class="font-bold">{{ a.title }}</p><p class="text-slate-500">{{ a.course.title }} · {{ a.created_at|jdate }}</p></li>
+      {% empty %}<li class="text-slate-500 text-sm">اطلاعیه‌ای نیست.</li>{% endfor %}
+    </ul></div>
+</div>
+{% endblock %}

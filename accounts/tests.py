@@ -12,7 +12,8 @@ class AccountsTests(TestCase):
     def test_profile_page_for_student(self):
         User.objects.create_user("sara", "s@example.com", "pw-12345-xyz")
         self.client.login(username="sara", password="pw-12345-xyz")
-        self.assertEqual(self.client.get(reverse("accounts:profile")).status_code, 200)
+        self.assertRedirects(self.client.get(reverse("accounts:profile")), reverse("panel:dashboard"))
+        self.assertEqual(self.client.get(reverse("accounts:edit_profile")).status_code, 200)
 
     def test_unknown_instructor_404(self):
         User.objects.create_user("plain", "p@example.com", "pw-12345-xyz")

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load school %}
+{% block title %}پنل دانشجو | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="grid gap-6 lg:grid-cols-[14rem_1fr]">
+  <aside class="card p-3 self-start lg:sticky lg:top-36">
+    <p class="px-3 pt-2 pb-3 text-sm text-slate-500">سلام، <span class="font-bold text-slate-800 dark:text-white">{{ user.display_name }}</span></p>
+    <nav class="flex lg:flex-col gap-1 overflow-x-auto no-scrollbar text-sm" aria-label="پنل دانشجو">
+      {% url 'panel:dashboard' as u_dash %}{% url 'panel:courses' as u_courses %}{% url 'panel:schedule' as u_sched %}{% url 'panel:announcements' as u_ann %}{% url 'panel:enrollments' as u_enr %}{% url 'accounts:edit_profile' as u_prof %}
+      <a href="{{ u_dash }}" class="rounded-xl px-3 py-2 whitespace-nowrap {% if section == 'dashboard' %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}">🏠 داشبورد</a>
+      <a href="{{ u_courses }}" class="rounded-xl px-3 py-2 whitespace-nowrap {% if section == 'courses' %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}">📚 دوره‌های من</a>
+      <a href="{{ u_sched }}" class="rounded-xl px-3 py-2 whitespace-nowrap {% if section == 'schedule' %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}">🗓️ برنامه کلاس‌ها</a>
+      <a href="{{ u_ann }}" class="rounded-xl px-3 py-2 whitespace-nowrap {% if section == 'announcements' %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}">📢 اطلاعیه‌ها</a>
+      <a href="{{ u_enr }}" class="rounded-xl px-3 py-2 whitespace-nowrap {% if section == 'enrollments' %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}">🧾 ثبت‌نام‌ها</a>
+      <a href="{{ u_prof }}" class="rounded-xl px-3 py-2 whitespace-nowrap {% if section == 'profile' %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}">👤 پروفایل</a>
+      <form method="post" action="{% url 'account_logout' %}">{% csrf_token %}<button class="w-full text-start rounded-xl px-3 py-2 whitespace-nowrap hover:bg-white/70 dark:hover:bg-slate-800/70">↩️ خروج</button></form>
+    </nav>
+  </aside>
+  <section class="min-w-0">{% block panel %}{% endblock %}</section>
+</div>
+{% endblock %}

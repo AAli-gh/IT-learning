@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from courses.models import Course, Enrollment
+from courses.models import Course
 
 from .forms import ProfileForm
 from .models import User
@@ -10,8 +10,7 @@ from .models import User
 
 @login_required
 def profile(request):
-    enrollments = Enrollment.objects.filter(user=request.user).select_related("course", "batch")
-    return render(request, "accounts/profile.html", {"enrollments": enrollments})
+    return redirect("panel:dashboard")
 
 
 @login_required
@@ -20,8 +19,8 @@ def edit_profile(request):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "پروفایل ذخیره شد.")
-        return redirect("accounts:profile")
-    return render(request, "accounts/edit_profile.html", {"form": form})
+        return redirect("accounts:edit_profile")
+    return render(request, "accounts/edit_profile.html", {"form": form, "section": "profile"})
 
 
 def instructor(request, username):

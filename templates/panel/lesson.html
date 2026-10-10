@@ -1,0 +1,22 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<nav class="text-xs text-slate-500 mb-2"><a href="{% url 'panel:courses' %}">دوره‌های من</a> ‹ <a href="{% url 'panel:course' course.slug %}">{{ course.title }}</a></nav>
+<div class="grid gap-6 xl:grid-cols-[1fr_16rem]">
+  <article class="card p-6">
+    <h1 class="text-2xl font-extrabold mb-3">{{ lesson.title }}</h1>
+    {% if lesson.video_url %}<p class="mb-3"><a class="btn-primary" href="{{ lesson.video_url }}" target="_blank" rel="noopener">▶ مشاهدهٔ ویدئو</a></p>{% endif %}
+    {% if lesson.body %}<div class="prose prose-slate dark:prose-invert max-w-none leading-8">{{ lesson.body_html|safe }}</div>{% endif %}
+    {% if lesson.attachment %}<p class="mt-4"><a class="btn-ghost" href="{% url 'panel:lesson_file' course.slug lesson.pk %}">📎 دریافت فایل ضمیمه</a></p>{% endif %}
+    <div class="mt-6">{% include "panel/partials/lesson_toggle.html" %}</div>
+    <div class="mt-6 flex justify-between text-sm">
+      {% if prev_lesson %}<a class="btn-ghost" href="{% url 'panel:lesson' course.slug prev_lesson.pk %}">→ قبلی</a>{% else %}<span></span>{% endif %}
+      {% if next_lesson %}<a class="btn-ghost" href="{% url 'panel:lesson' course.slug next_lesson.pk %}">بعدی ←</a>{% endif %}
+    </div>
+  </article>
+  <aside class="card p-4 self-start text-sm">
+    <p class="font-bold mb-2">فهرست درس‌ها</p>
+    <ol class="space-y-1">{% for l in lessons %}<li><a class="flex gap-2 rounded-lg px-2 py-1.5 {% if l.pk == lesson.pk %}bg-brand-600 text-white{% else %}hover:bg-white/70 dark:hover:bg-slate-800/70{% endif %}" href="{% url 'panel:lesson' course.slug l.pk %}"><span>{% if l.pk in done %}✓{% else %}{{ forloop.counter|fa_digits }}.{% endif %}</span><span>{{ l.title }}</span></a></li>{% endfor %}</ol>
+  </aside>
+</div>
+{% endblock %}

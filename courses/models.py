@@ -7,6 +7,8 @@ from django.utils import timezone
 from core.models import SEOFields
 from core.rendering import render_markdown
 
+from .storage import private_storage
+
 
 class Category(SEOFields):
     name = models.CharField("نام", max_length=100)
@@ -227,3 +229,78 @@ class Faq(models.Model):
 
     def __str__(self):
         return self.question
+
+
+class Lesson(models.Model):
+    """One lesson of the course content, visible to students with a confirmed enrollment."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="lessons")
+    title = models.CharField("عنوان", max_length=200)
+    order = models.PositiveIntegerField("ترتیب", default=0)
+    body = models.TextField("توضیحات (Markdown)", blank=True)
+    video_url = models.URLField("لینک ویدئو", blank=True)
+    attachment = models.FileField("فایل ضمیمه", upload_to="lessons/", storage=private_storage, blank=True)
+    duration_minutes = models.PositiveIntegerField("مدت (دقیقه)", default=0)
+    is_published = models.BooleanField("منتشر شده", default=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "درس"
+        verbose_name_plural = "درس‌ها"
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def body_html(self):
+        return render_markdown(self.body)[0]
+
+
+class LessonProgress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="lesson_progress")
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="progress")
+    completed_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "lesson"], name="one_progress_per_lesson")]
+        verbose_name = "پیشرفت درس"
+        verbose_name_plural = "پیشرفت درس‌ها"
+
+
+class ClassSession(models.Model):
+    """A scheduled class meeting of a batch."""
+
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="sessions")
+    title = models.CharField("موضوع جلسه", max_length=200)
+    starts_at = models.DateTimeField("زمان شروع")
+    duration_minutes = models.PositiveIntegerField("مدت (دقیقه)", default=120)
+    place = models.CharField("مکان / لینک کلاس آنلاین", max_length=250, blank=True)
+    recording_url = models.URLField("لینک ضبط جلسه", blank=True)
+
+    class Meta:
+        ordering = ["starts_at"]
+        verbose_name = "جلسه کلاس"
+        verbose_name_plural = "جلسات کلاس"
+
+    def __str__(self):
+        return f"{self.batch} — {self.title}"
+
+
+class Announcement(models.Model):
+    """Notice for the students of a course (optionally only of one batch)."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="announcements")
+    batch = models.ForeignKey(Batch, null=True, blank=True, on_delete=models.CASCADE, related_name="announcements",
+                              verbose_name="دوره برگزاری (اختیاری)")
+    title = models.CharField("عنوان", max_length=200)
+    body = models.TextField("متن")
+    is_published = models.BooleanField("منتشر شده", default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "اطلاعیه"
+        verbose_name_plural = "اطلاعیه‌ها"
+
+    def __str__(self):
+        return self.title

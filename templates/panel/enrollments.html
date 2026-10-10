@@ -1,0 +1,14 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<h1 class="text-2xl font-extrabold mb-4">ثبت‌نام‌های من</h1>
+<ul class="space-y-3">
+  {% for e in items %}
+  <li class="card p-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+    <div><a class="font-bold" href="{{ e.course.get_absolute_url }}">{{ e.course.title }}</a><p class="text-slate-500">{{ e.batch.title|default:"بدون دورهٔ مشخص" }} · {{ e.created_at|jdate }}</p></div>
+    <span class="pill">{{ e.get_status_display }}</span>
+    {% if e.status == "pending" %}<form method="post" action="{% url 'panel:cancel_enrollment' e.pk %}" onsubmit="return confirm('ثبت‌نام لغو شود؟')">{% csrf_token %}<button class="btn-ghost !text-rose-600">لغو</button></form>{% endif %}
+  </li>
+  {% empty %}<li class="text-slate-500">ثبت‌نامی ندارید. <a class="text-brand-600" href="{{ '/courses/' }}">مشاهدهٔ دوره‌ها</a></li>{% endfor %}
+</ul>
+{% endblock %}

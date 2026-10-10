@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import Batch, Category, Course, Enrollment, Faq, Review, Topic
+from core.notify import notify_student
+
+from .models import Announcement, Batch, Category, ClassSession, Course, Enrollment, Faq, Lesson, Review, Topic
 
 
 @admin.register(Category)
@@ -15,6 +17,12 @@ class TopicInline(admin.TabularInline):
     extra = 3
 
 
+class LessonInline(admin.StackedInline):
+    model = Lesson
+    extra = 0
+    classes = ("collapse",)
+
+
 class BatchInline(admin.TabularInline):
     model = Batch
     extra = 1
@@ -27,7 +35,7 @@ class CourseAdmin(admin.ModelAdmin):
     list_editable = ("is_published", "is_featured")
     search_fields = ("title", "summary", "magazine_tag")
     prepopulated_fields = {"slug": ("title",)}
-    inlines = [TopicInline, BatchInline]
+    inlines = [TopicInline, BatchInline, LessonInline]
     fieldsets = (
         (None, {"fields": ("title", "slug", "category", "instructor", "level", "summary", "description", "cover")}),
         ("جزئیات", {"fields": ("price", "duration_hours", "prerequisites")}),
@@ -46,9 +54,24 @@ class EnrollmentAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     actions = ["confirm", "cancel"]
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if change and "status" in form.changed_data and obj.status == Enrollment.Status.CONFIRMED:
+            self._notify_confirmed(obj)
+
+    @staticmethod
+    def _notify_confirmed(enrollment):
+        email = enrollment.email or (enrollment.user.email if enrollment.user else "")
+        notify_student(email, f"ثبت‌نام شما در «{enrollment.course.title}» تأیید شد",
+                       f"{enrollment.full_name} عزیز،\nثبت‌نام شما تأیید شد. از پنل دانشجو می‌توانید محتوا و "
+                       "برنامهٔ کلاس‌ها را ببینید.")
+
     @admin.action(description="تأیید ثبت‌نام‌های انتخاب‌شده")
     def confirm(self, request, queryset):
-        queryset.update(status=Enrollment.Status.CONFIRMED)
+        for enrollment in queryset.exclude(status=Enrollment.Status.CONFIRMED).select_related("course", "user"):
+            enrollment.status = Enrollment.Status.CONFIRMED
+            enrollment.save(update_fields=["status"])
+            self._notify_confirmed(enrollment)
 
     @admin.action(description="لغو ثبت‌نام‌های انتخاب‌شده")
     def cancel(self, request, queryset):
@@ -69,3 +92,17 @@ class FaqAdmin(admin.ModelAdmin):
     list_editable = ("order", "is_published")
     list_filter = ("is_published", "course")
     search_fields = ("question", "answer")
+
+
+@admin.register(ClassSession)
+class ClassSessionAdmin(admin.ModelAdmin):
+    list_display = ("title", "batch", "starts_at", "place")
+    list_filter = ("batch__course",)
+    date_hierarchy = "starts_at"
+
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ("title", "course", "batch", "is_published", "created_at")
+    list_filter = ("course", "is_published")
+    list_editable = ("is_published",)

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "accounts",
     "courses",
+    "panel",
     "core",
 ]
 
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_URL = "account_login"
-LOGIN_REDIRECT_URL = "accounts:profile"
+LOGIN_REDIRECT_URL = "panel:dashboard"
 LOGOUT_REDIRECT_URL = "courses:home"
 
 # --- django-allauth: signup/login, email verification, password reset, social login ---
@@ -195,6 +196,8 @@ STORAGES = {
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+# Student-only files (lesson attachments); never exposed through MEDIA_URL.
+PRIVATE_MEDIA_ROOT = Path(os.environ.get("PRIVATE_MEDIA_ROOT", BASE_DIR / "private_media"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

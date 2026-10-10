@@ -1,0 +1,8 @@
+{% load school %}
+<div id="lesson-toggle" class="flex flex-wrap items-center gap-3">
+  <button class="{% if completed %}btn-ghost{% else %}btn-primary{% endif %}"
+          hx-post="{% url 'panel:toggle_lesson' course.slug lesson.pk %}" hx-target="#lesson-toggle" hx-swap="outerHTML">
+    {% if completed %}✓ انجام شد (برگرداندن){% else %}علامت‌گذاری به‌عنوان انجام‌شده{% endif %}
+  </button>
+  <span class="text-sm text-slate-500">پیشرفت دوره: {{ percent|fa_digits }}٪</span>
+</div>

@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from accounts.models import User
 from core.models import Page
-from courses.models import Batch, Category, Course, Faq, Topic
+from courses.models import Announcement, Batch, Category, ClassSession, Course, Faq, Lesson, Topic
 
 CATEGORIES = [
     ("برنامه‌نویسی", "programming", "💻"), ("توسعه وب", "web", "🌐"), ("شبکه", "network", "🔌"),
@@ -72,6 +72,13 @@ class Command(BaseCommand):
                 if created:
                     for i, t in enumerate(topics):
                         Topic.objects.create(course=course, title=t, order=i)
-                    Batch.objects.create(course=course, title="دوره بعدی", start_date=start,
-                                         schedule="شنبه و دوشنبه ۱۸ تا ۲۰")
+                    batch = Batch.objects.create(course=course, title="دوره بعدی", start_date=start,
+                                                 schedule="شنبه و دوشنبه ۱۸ تا ۲۰")
+                    for i, t in enumerate(topics):
+                        Lesson.objects.create(course=course, title=f"جلسه {i + 1}: {t}", order=i, duration_minutes=90,
+                                              body="محتوای این درس به‌زودی تکمیل می‌شود.")
+                        when = timezone.make_aware(datetime.datetime.combine(start, datetime.time(18)) +
+                                                   datetime.timedelta(days=7 * i))
+                        ClassSession.objects.create(batch=batch, title=t, starts_at=when, place="کلاس ۱")
+                    Announcement.objects.create(course=course, title="خوش آمدید", body="به دوره خوش آمدید! جزئیات برگزاری در همین بخش اطلاع‌رسانی می‌شود.")
         self.stdout.write(self.style.SUCCESS("Seeded."))

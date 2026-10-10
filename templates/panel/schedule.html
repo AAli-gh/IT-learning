@@ -1,0 +1,12 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<h1 class="text-2xl font-extrabold mb-4">برنامه کلاس‌ها</h1>
+<h2 class="section-title">پیش‌رو</h2>
+<ul class="space-y-2 mb-6">
+  {% for s in upcoming %}<li class="panel !p-3 text-sm"><p class="font-bold">{{ s.title }} <span class="font-normal text-slate-500">· {{ s.batch.course.title }}</span></p><p class="text-slate-500">{{ s.starts_at|jdate:"%A %d %B ساعت %H:%M" }} · {{ s.duration_minutes|fa_digits }} دقیقه{% if s.place %} · {{ s.place }}{% endif %}</p></li>
+  {% empty %}<li class="text-slate-500 text-sm">جلسهٔ پیش‌رویی ثبت نشده است.</li>{% endfor %}
+</ul>
+{% if past %}<h2 class="section-title">گذشته</h2>
+<ul class="space-y-2">{% for s in past %}<li class="panel !p-3 text-sm flex flex-wrap justify-between gap-2"><span>{{ s.title }} · {{ s.batch.course.title }}</span><span class="text-slate-500">{{ s.starts_at|jdate }}</span>{% if s.recording_url %}<a class="text-brand-600" href="{{ s.recording_url }}" target="_blank" rel="noopener">ضبط جلسه</a>{% endif %}</li>{% endfor %}</ul>{% endif %}
+{% endblock %}

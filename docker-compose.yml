@@ -28,6 +28,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - media:/app/media
+      - private:/app/private_media
     ports:
       - "8001:8001"
     depends_on:
@@ -37,3 +38,4 @@ services:
 volumes:
   pgdata:
   media:
+  private:

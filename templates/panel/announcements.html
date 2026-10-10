@@ -1,0 +1,9 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<h1 class="text-2xl font-extrabold mb-4">اطلاعیه‌ها</h1>
+<div class="space-y-3">
+  {% for a in items %}<article class="card p-5"><p class="font-bold">{{ a.title }}</p><p class="text-xs text-slate-500 mb-2">{{ a.course.title }} · {{ a.created_at|jdate }}</p><p class="leading-8">{{ a.body|linebreaksbr }}</p></article>
+  {% empty %}<p class="text-slate-500">اطلاعیه‌ای وجود ندارد.</p>{% endfor %}
+</div>
+{% endblock %}
