@@ -1,5 +1,5 @@
 {# Articles from the sister site (IT Magazine). Renders nothing when the magazine is unreachable. #}
-{% if articles %}
+{% if articles and MAGAZINE_URL %}
 <section class="mt-10">
   <h2 class="section-title"><span>📰 {{ title|default:"مطالب مرتبط در مجله" }}</span>
     <a class="see-all" href="{{ more_url|default:MAGAZINE_URL }}" rel="noopener">مشاهده در مجله ←</a></h2>

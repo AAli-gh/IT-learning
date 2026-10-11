@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def _get(path, params=None):
+    if not settings.MAGAZINE_API_URL:  # link to the magazine not configured
+        return []
     key = "mag:" + path + ":" + "&".join(f"{k}={v}" for k, v in sorted((params or {}).items()))
     cached = cache.get(key)
     if cached is not None:
@@ -46,4 +48,6 @@ def articles_for_tag(tag, limit=3):
 
 
 def tag_url(tag):
+    if not settings.MAGAZINE_URL:
+        return ""
     return f"{settings.MAGAZINE_URL}/tag/{quote(tag)}/" if tag else settings.MAGAZINE_URL

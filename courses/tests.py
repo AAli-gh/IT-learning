@@ -149,6 +149,7 @@ class MagazineClientTests(TestCase):
             self.assertEqual(magazine.articles_for_tag(""), [])
             get.assert_not_called()
 
+    @override_settings(MAGAZINE_URL="https://mag.example", MAGAZINE_API_URL="https://mag.example/api")
     def test_detail_renders_related_articles(self):
         make_course()
         arts = [{"title": "مقاله پایتون", "display_title": "مقاله پایتون", "url": "https://mag.example/a/", "excerpt": "e"}]
@@ -236,3 +237,24 @@ class MagazineLinksTests(TestCase):
         for path in ("/type/news/", "/type/article/", "/type/tutorial/"):
             self.assertIn(f"https://mag.example{path}", html)
         self.assertEqual(magazine.tag_url("python").replace(settings.MAGAZINE_URL, ""), "/tag/python/")
+
+
+class MagazineOptionalTests(TestCase):
+    """Until MAGAZINE_URL is set the site must work standalone: no links, no outbound requests."""
+
+    @override_settings(MAGAZINE_URL="", MAGAZINE_API_URL="")
+    def test_no_magazine_links_or_requests_when_not_configured(self):
+        make_course()
+        with mock.patch("core.magazine.requests.get") as get:
+            for url in (reverse("courses:home"), reverse("courses:detail", args=["python"])):
+                html = self.client.get(url).content.decode()
+                self.assertNotIn("مجله IT", html)
+                self.assertNotIn("/type/news/", html)
+            get.assert_not_called()
+        self.assertEqual(magazine.tag_url("python"), "")
+
+    @override_settings(MAGAZINE_URL="https://mag.example", MAGAZINE_API_URL="https://mag.example/api")
+    def test_links_appear_when_configured(self):
+        with mock.patch("core.magazine._get", return_value=[]):
+            html = self.client.get(reverse("courses:home")).content.decode()
+        self.assertIn("https://mag.example", html)

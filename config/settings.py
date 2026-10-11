@@ -260,8 +260,9 @@ if not DEBUG:
 
 # --- Link to the sister site (IT Magazine) ---
 # The school reads articles from the magazine's public API and exposes /api/courses/ for the magazine.
-MAGAZINE_URL = os.environ.get("MAGAZINE_URL", "https://magazine.example.com").rstrip("/")
-MAGAZINE_API_URL = os.environ.get("MAGAZINE_API_URL", MAGAZINE_URL + "/api").rstrip("/")
+# Empty MAGAZINE_URL = the link is switched off: no magazine links, boxes or API calls.
+MAGAZINE_URL = os.environ.get("MAGAZINE_URL", "").rstrip("/")
+MAGAZINE_API_URL = (os.environ.get("MAGAZINE_API_URL") or (MAGAZINE_URL + "/api" if MAGAZINE_URL else "")).rstrip("/")
 MAGAZINE_NAME = os.environ.get("MAGAZINE_NAME", "مجله فناوری")
 MAGAZINE_TIMEOUT = float(os.environ.get("MAGAZINE_TIMEOUT", "3"))
 MAGAZINE_CACHE_SECONDS = int(os.environ.get("MAGAZINE_CACHE_SECONDS", "600"))
