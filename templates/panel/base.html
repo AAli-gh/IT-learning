@@ -3,7 +3,7 @@
 {% block title %}پنل دانشجو | {{ SITE_NAME }}{% endblock %}
 {% block content %}
 <div class="grid gap-6 lg:grid-cols-[14rem_1fr]">
-  <aside class="card p-3 self-start lg:sticky lg:top-36">
+  <aside class="card p-3 self-start lg:sticky lg:top-4">
     <p class="px-3 pt-2 pb-3 text-sm text-slate-500">سلام، <span class="font-bold text-slate-800 dark:text-white">{{ user.display_name }}</span></p>
     <nav class="flex lg:flex-col gap-1 overflow-x-auto no-scrollbar text-sm" aria-label="پنل دانشجو">
       {% url 'panel:dashboard' as u_dash %}{% url 'panel:courses' as u_courses %}{% url 'panel:schedule' as u_sched %}{% url 'panel:announcements' as u_ann %}{% url 'panel:enrollments' as u_enr %}{% url 'panel:certificates' as u_cert %}{% url 'accounts:edit_profile' as u_prof %}

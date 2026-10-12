@@ -1,50 +1,49 @@
-{% url 'courses:home' as u_home %}{% url 'courses:list' as u_list %}
-<header class="sticky top-0 z-40 glass !ring-0 border-b border-white/60 dark:border-white/10 shadow-[0_4px_24px_rgb(49_46_129/0.08)]">
-  <div class="mx-auto max-w-7xl px-3 sm:px-4 h-16 flex items-center gap-2 sm:gap-4">
-    <a href="{{ u_home }}" class="flex items-center gap-2.5 shrink-0" aria-label="{{ SITE_NAME }}">
-      <span class="grid place-items-center h-10 w-10 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white font-black shadow-lg shadow-brand-600/30">IT</span>
+{% load school %}{% url 'courses:home' as u_home %}{% url 'courses:list' as u_list %}{% url 'courses:instructors' as u_inst %}
+{# Floating header: logo, search and account buttons on the first row; a capsule menu with an icon per item below. #}
+<header class="relative z-40">
+  <div class="mx-auto max-w-7xl px-3 sm:px-4 pt-4 flex items-center gap-3 sm:gap-5">
+    <a href="{{ u_home }}" class="flex items-center gap-3 shrink-0" aria-label="{{ SITE_NAME }}">
+      <span class="grid place-items-center h-12 w-12 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white text-lg font-black shadow-lg shadow-brand-600/30">IT</span>
       <span class="leading-tight hidden sm:inline">
-        <span class="block text-lg font-black tracking-tight text-slate-900 dark:text-white">{{ SITE_NAME }}</span>
-        <span class="block text-[10px] font-semibold text-brand-700/80 dark:text-brand-500 tracking-[0.2em]" dir="ltr">IT ACADEMY</span>
+        <span class="block text-xl font-black tracking-tight text-slate-900 dark:text-white">{{ SITE_NAME }}</span>
+        <span class="block text-[11px] font-bold text-brand-700/80 dark:text-brand-500 tracking-[0.2em]" dir="ltr">IT ACADEMY</span>
       </span>
     </a>
 
-    <form action="{{ u_list }}" method="get" role="search" class="hidden md:block flex-1 max-w-md mx-auto relative" data-suggest>
+    <form action="{{ u_list }}" method="get" role="search" class="hidden md:block flex-1 max-w-xl mx-auto relative" data-suggest>
       <label class="relative block">
         <span class="sr-only">جستجو</span>
         <input type="search" name="q" value="{{ q|default:'' }}" placeholder="جستجو در دوره‌ها..." autocomplete="off"
                hx-get="{% url 'courses:suggest' %}" hx-trigger="input changed delay:250ms" hx-target="#search-suggest"
-               class="w-full rounded-full border-0 bg-white/70 dark:bg-slate-800/70 ring-1 ring-white/80 dark:ring-white/10 pr-11 text-sm shadow-inner focus:ring-2 focus:ring-brand-500">
-        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+               class="w-full rounded-full border-0 bg-white/75 dark:bg-slate-800/75 backdrop-blur-xl ring-1 ring-white/80 dark:ring-white/10 shadow-[0_4px_20px_rgb(49_46_129/0.08)] py-3 pr-14 text-sm focus:ring-2 focus:ring-brand-500">
+        <span class="absolute right-5 top-1/2 -translate-y-1/2">{% icon "search" 22 %}</span>
       </label>
       <div id="search-suggest" class="absolute inset-x-0 top-full mt-2 z-50"></div>
     </form>
 
-    <nav class="mr-auto flex items-center gap-1.5 text-sm [&_.btn-ghost]:rounded-full [&_.btn-primary]:rounded-full [&_.btn-ghost]:px-2.5 [&_.btn-primary]:px-2.5 sm:[&_.btn-ghost]:px-4 sm:[&_.btn-primary]:px-4">
-      <a href="{{ u_list }}" class="md:hidden btn-ghost" aria-label="جستجو">🔍</a>
-      <button type="button" class="btn-ghost max-[359px]:hidden" data-theme-toggle aria-label="تغییر تم">🌓</button>
-      {# Sister site: same brand, one click away. #}
-      {% if MAGAZINE_URL %}<a href="{{ MAGAZINE_URL }}" class="btn-ghost" rel="noopener">📰 <span class="hidden sm:inline">{{ MAGAZINE_NAME }}</span></a>{% endif %}
+    <div class="mr-auto flex items-center gap-2 sm:gap-3">
+      <a href="{{ u_list }}" class="md:hidden head-round" aria-label="جستجو">{% icon "search" 22 %}</a>
+      <button type="button" class="head-round" data-theme-toggle aria-label="تغییر تم">{% icon "theme" 24 %}</button>
+      <span class="hidden sm:block h-7 w-px bg-slate-400/40 dark:bg-white/20" aria-hidden="true"></span>
+      {% if MAGAZINE_URL %}<a href="{{ MAGAZINE_URL }}" class="head-pill" rel="noopener">📰 <span class="hidden lg:inline">{{ MAGAZINE_NAME }}</span></a>{% endif %}
       {% if user.is_authenticated %}
-        <a href="{% url 'panel:dashboard' %}" class="btn-ghost">🎓 <span class="hidden sm:inline">{{ user.display_name }}</span></a>
-        {% if user.is_superuser %}<a href="{% url 'admin:index' %}" class="btn-primary" aria-label="پنل مدیریت" data-admin-link>⚙️ <span class="hidden sm:inline">پنل مدیریت</span></a>{% endif %}
+        {% if user.is_superuser %}<a href="{% url 'admin:index' %}" class="head-round !bg-violet-600 hover:!bg-violet-700 !ring-0" aria-label="پنل مدیریت" data-admin-link>{% icon "gear" 22 %}</a>{% endif %}
+        <a href="{% url 'panel:dashboard' %}" class="head-pill">{% icon "cap" 22 %}<span class="hidden sm:inline">{{ user.display_name }}</span><span class="sm:hidden">پنل</span></a>
       {% else %}
-        <a href="{% url 'account_login' %}" class="btn-ghost">👤 <span class="hidden sm:inline">ورود / ثبت‌نام</span><span class="sm:hidden">ورود</span></a>
+        <a href="{% url 'account_login' %}" class="head-pill">{% icon "user" 22 "text-violet-800 dark:text-violet-300" %}<span class="hidden sm:inline">ورود / ثبت‌نام</span><span class="sm:hidden">ورود</span></a>
       {% endif %}
-    </nav>
+    </div>
   </div>
 
-  <div class="border-t border-white/50 dark:border-white/5">
-    <nav class="mx-auto max-w-7xl px-3 sm:px-4 flex items-center md:justify-center gap-1 overflow-x-auto no-scrollbar text-sm font-medium" aria-label="بخش‌های سایت">
-      <a href="{{ u_home }}" class="nav-link {% if request.path == u_home %}is-active{% endif %}">صفحه اصلی</a>
-      <a href="{{ u_list }}" class="nav-link {% if request.path == u_list %}is-active{% endif %}">همه دوره‌ها</a>
+  <div class="mx-auto max-w-7xl px-3 sm:px-4 mt-4 flex justify-center">
+    <nav class="nav-capsule no-scrollbar" aria-label="بخش‌های سایت">
+      <a href="{{ u_home }}" class="nav-item {% if request.path == u_home %}is-active{% endif %}">{% icon "home" %}صفحه اصلی</a>
+      <a href="{{ u_list }}" class="nav-item {% if request.path == u_list %}is-active{% endif %}">{% icon "layers" %}همه دوره‌ها</a>
       {% for cat in nav_categories %}
-      <a href="{{ cat.get_absolute_url }}" class="nav-link {% if request.path == cat.get_absolute_url %}is-active{% endif %}">{{ cat.icon }} {{ cat.name }}</a>
+      <a href="{{ cat.get_absolute_url }}" class="nav-item {% if request.path == cat.get_absolute_url %}is-active{% endif %}">{% category_icon cat %}{{ cat.name }}</a>
       {% endfor %}
-      <a href="{% url 'courses:instructors' %}" class="nav-link {% if 'instructors' in request.path %}is-active{% endif %}">مدرسان</a>
-      <a href="{% url 'courses:faq' %}" class="nav-link {% if request.path == '/faq/' %}is-active{% endif %}">سؤالات متداول</a>
-      <a href="{% url 'core:contact' %}" class="nav-link {% if request.path == '/contact/' %}is-active{% endif %}">تماس</a>
-      {% if MAGAZINE_URL %}<a href="{{ MAGAZINE_URL }}" class="nav-link" rel="noopener">مجله IT ↗</a>{% endif %}
+      <a href="{{ u_inst }}" class="nav-item {% if request.path == u_inst %}is-active{% endif %}">{% icon "cap" %}مدرسان</a>
+      {% if MAGAZINE_URL %}<a href="{{ MAGAZINE_URL }}" class="nav-item" rel="noopener">📰 مجله IT ↗</a>{% endif %}
     </nav>
   </div>
 </header>
