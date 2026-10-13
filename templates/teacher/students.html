@@ -1,0 +1,9 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<h2 class="section-title">دانشجویان ({{ rows|length|fa_digits }})</h2>
+<div class="card p-4 overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-slate-500"><th class="text-start p-2">نام</th><th class="text-start p-2">دوره برگزاری</th><th class="text-start p-2">پیشرفت</th><th class="text-start p-2">حضور</th><th class="text-start p-2">میانگین تکالیف</th></tr></thead><tbody>
+  {% for r in rows %}<tr class="border-t border-slate-200/60 dark:border-white/10"><td class="p-2"><a class="font-bold text-brand-700 dark:text-brand-500" href="{% url 'teacher:student' course.slug r.user.pk %}">{{ r.user.display_name }}</a></td>
+    <td class="p-2">{{ r.enrollment.batch.title|default:"—" }}</td><td class="p-2">{{ r.progress|fa_digits }}٪</td><td class="p-2">{% if r.attendance is None %}—{% else %}{{ r.attendance|fa_digits }}٪{% endif %}</td><td class="p-2">{% if r.average is None %}—{% else %}{{ r.average|fa_digits }}{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="5" class="p-3 text-slate-500">دانشجوی تأییدشده‌ای نیست.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

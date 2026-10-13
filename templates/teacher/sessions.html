@@ -1,0 +1,12 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<div class="flex justify-between items-center mb-3"><h2 class="section-title !mb-0">جلسات کلاس</h2><a class="btn-primary" href="{% url 'teacher:session_new' course.slug %}">＋ جلسهٔ جدید</a></div>
+<ul class="space-y-2">
+  {% for s in sessions %}<li class="panel !p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+    <span><span class="font-bold">{{ s.title }}</span> <span class="text-slate-500">· {{ s.batch.title|default:"دوره" }}</span><span class="block text-xs text-slate-500">{{ s.starts_at|jdate:"%A %d %B ساعت %H:%M" }}{% if s.place %} · {{ s.place }}{% endif %}</span></span>
+    <span class="flex gap-2"><a class="btn-primary !py-1" href="{% url 'teacher:attendance' course.slug s.pk %}">حضور و غیاب</a><a class="btn-ghost !py-1" href="{% url 'teacher:session_edit' course.slug s.pk %}">ویرایش</a>
+      <form method="post" action="{% url 'teacher:session_delete' course.slug s.pk %}" onsubmit="return confirm('جلسه و حضور و غیابش حذف شود؟')">{% csrf_token %}<button class="btn-ghost !py-1 !text-rose-600">حذف</button></form></span></li>
+  {% empty %}<li class="text-slate-500 text-sm">جلسه‌ای ثبت نشده است.</li>{% endfor %}
+</ul>
+{% endblock %}

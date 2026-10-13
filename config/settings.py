@@ -57,6 +57,9 @@ INSTALLED_APPS = [
     "accounts",
     "courses",
     "panel",
+    "teacher",
+    "reports",
+    "notifications",
     "core",
 ]
 
@@ -88,6 +91,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site",
+                "notifications.context_processors.unread",
             ],
         },
     },
@@ -221,6 +225,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 MAX_IMAGE_UPLOAD_MB = int(os.environ.get("MAX_IMAGE_UPLOAD_MB", 10))
 MAX_SUBMISSION_MB = int(os.environ.get("MAX_SUBMISSION_MB", 10))
+MAX_VIDEO_UPLOAD_MB = int(os.environ.get("MAX_VIDEO_UPLOAD_MB", 300))
 
 LOGGING = {
     "version": 1,

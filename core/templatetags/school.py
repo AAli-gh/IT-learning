@@ -26,6 +26,12 @@ def toman(value):
 
 
 @register.filter
+def money(value):
+    """Like ``toman`` but zero stays "۰ تومان" (for amounts received/owed, where "free" would be wrong)."""
+    return f"{int(value or 0):,}".replace(",", "٬").translate(PERSIAN_DIGITS) + " تومان"
+
+
+@register.filter
 def jdate(value, fmt="%d %B %Y"):
     """Render a date/datetime as a Jalali (Shamsi) date with Persian digits."""
     if not value:

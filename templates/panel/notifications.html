@@ -1,0 +1,14 @@
+{% extends "panel/base.html" %}
+{% load school %}
+{% block panel %}
+<div class="flex items-center justify-between mb-4"><h1 class="text-2xl font-extrabold">اعلان‌ها</h1>
+  {% if unread_notifications %}<form method="post" action="{% url 'panel:notifications_read_all' %}">{% csrf_token %}<button class="btn-ghost text-sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</button></form>{% endif %}</div>
+<ul class="space-y-2">
+  {% for n in items %}
+  <li><a href="{% url 'panel:notification_open' n.pk %}" class="panel !p-4 block hover:bg-white/80 dark:hover:bg-slate-800/80 {% if not n.is_read %}ring-2 ring-brand-500/60{% endif %}">
+    <p class="font-bold">{% if not n.is_read %}<span class="inline-block h-2 w-2 rounded-full bg-rose-600 me-1"></span>{% endif %}{{ n.title }}</p>
+    {% if n.body %}<p class="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-7">{{ n.body|truncatechars:200 }}</p>{% endif %}
+    <p class="text-xs text-slate-500 mt-1">{{ n.created_at|jdate:"%d %B ساعت %H:%M" }}</p></a></li>
+  {% empty %}<li class="text-slate-500">اعلانی ندارید.</li>{% endfor %}
+</ul>
+{% endblock %}

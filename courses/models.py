@@ -8,10 +8,12 @@ from django.db.models import Avg, Count, Q
 from django.urls import reverse
 from django.utils import timezone
 
+from core import textutils
 from core.models import SEOFields
 from core.rendering import render_markdown
 
 from .storage import private_storage
+from .validators import validate_attachment_size, validate_video_size
 
 
 class Category(SEOFields):
@@ -41,13 +43,29 @@ class CourseQuerySet(models.QuerySet):
     def with_relations(self):
         return self.select_related("category", "instructor").prefetch_related("batches")
 
+    def _match(self, query):
+        """AND over the words of each query variant, OR across variants (Persian/English synonyms)."""
+        any_variant = Q()
+        for variant in textutils.query_variants(query):
+            all_words = Q()
+            for word in variant.split():
+                all_words &= Q(search_text__contains=word)
+            any_variant |= all_words
+        return self.filter(any_variant) if any_variant else self.none()
+
     def search(self, term):
-        if not term:
+        """Persian-aware search: ی/ک variants, digits, half-spaces, fa<->en synonyms and one-typo correction."""
+        term = (term or "").strip()
+        if not term or not textutils.normalize(term):
             return self
-        return self.filter(
-            Q(title__icontains=term) | Q(summary__icontains=term)
-            | Q(description__icontains=term) | Q(magazine_tag__icontains=term)
-        )
+        found = self._match(term)
+        if found.exists():
+            return found
+        vocabulary = set()
+        for text in Course.objects.values_list("search_text", flat=True):
+            vocabulary.update(text.split())
+        fixed = textutils.suggest_correction(term, sorted(vocabulary))
+        return self._match(fixed) if fixed else found
 
 
 class Course(SEOFields):
@@ -79,6 +97,8 @@ class Course(SEOFields):
     published_at = models.DateTimeField("تاریخ انتشار", default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Normalised copy of the searchable fields (see core.textutils); rebuilt on every save.
+    search_text = models.TextField(editable=False, blank=True, default="")
 
     objects = CourseQuerySet.as_manager()
 
@@ -92,6 +112,16 @@ class Course(SEOFields):
 
     def get_absolute_url(self):
         return reverse("courses:detail", args=[self.slug])
+
+    def build_search_text(self):
+        parts = [self.title, self.summary, self.description, self.magazine_tag, self.prerequisites]
+        if self.category_id:
+            parts.append(self.category.name)
+        return textutils.normalize(" ".join(p for p in parts if p))
+
+    def save(self, *args, **kwargs):
+        self.search_text = self.build_search_text()
+        super().save(*args, **kwargs)
 
     @property
     def description_html(self):
@@ -164,8 +194,23 @@ class Batch(models.Model):
         return max(0, self.capacity - self.taken)
 
     @property
+    def held_seats(self):
+        """Seats offered to people on the waiting list who haven't registered yet (offer valid for HOLD_HOURS)."""
+        cutoff = timezone.now() - datetime.timedelta(hours=WaitlistEntry.HOLD_HOURS)
+        return self.waitlist.filter(status=WaitlistEntry.Status.NOTIFIED, notified_at__gte=cutoff).count()
+
+    @property
     def accepts_enrollment(self):
-        return self.is_open and self.seats_left > 0
+        """Open to the public: a free seat that is not already offered to someone on the waiting list."""
+        return self.is_open and self.seats_left - self.held_seats > 0
+
+    def accepts_enrollment_for(self, phone):
+        """Same, but a person holding a waiting-list offer for this batch may take their held seat."""
+        if self.accepts_enrollment:
+            return True
+        cutoff = timezone.now() - datetime.timedelta(hours=WaitlistEntry.HOLD_HOURS)
+        return self.is_open and self.seats_left > 0 and self.waitlist.filter(
+            phone=phone, status=WaitlistEntry.Status.NOTIFIED, notified_at__gte=cutoff).exists()
 
 
 class Enrollment(models.Model):
@@ -185,11 +230,23 @@ class Enrollment(models.Model):
     note = models.TextField("توضیحات", blank=True)
     status = models.CharField("وضعیت", max_length=10, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField("زمان ثبت", auto_now_add=True)
+    # Snapshot of the fee at registration time plus what has been collected so far (manual bookkeeping).
+    price = models.PositiveBigIntegerField("شهریه (تومان)", default=0)
+    paid_amount = models.PositiveBigIntegerField("مبلغ پرداخت‌شده (تومان)", default=0)
 
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "ثبت‌نام"
         verbose_name_plural = "ثبت‌نام‌ها"
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and not self.price:
+            self.price = self.course.price
+        super().save(*args, **kwargs)
+
+    @property
+    def outstanding(self):
+        return max(0, self.price - self.paid_amount)
 
     def __str__(self):
         return f"{self.full_name} — {self.course.title}"
@@ -243,7 +300,11 @@ class Lesson(models.Model):
     order = models.PositiveIntegerField("ترتیب", default=0)
     body = models.TextField("توضیحات (Markdown)", blank=True)
     video_url = models.URLField("لینک ویدئو", blank=True)
-    attachment = models.FileField("فایل ضمیمه", upload_to="lessons/", storage=private_storage, blank=True)
+    attachment = models.FileField("فایل ضمیمه", upload_to="lessons/", storage=private_storage, blank=True,
+                                  validators=[validate_attachment_size])
+    video_file = models.FileField("ویدئوی آپلودی", upload_to="videos/", storage=private_storage, blank=True,
+                                  validators=[FileExtensionValidator(["mp4", "webm"]), validate_video_size],
+                                  help_text="mp4 یا webm؛ فقط برای دانشجویان تأییدشده پخش می‌شود.")
     duration_minutes = models.PositiveIntegerField("مدت (دقیقه)", default=0)
     is_published = models.BooleanField("منتشر شده", default=True)
 
@@ -280,6 +341,7 @@ class ClassSession(models.Model):
     duration_minutes = models.PositiveIntegerField("مدت (دقیقه)", default=120)
     place = models.CharField("مکان / لینک کلاس آنلاین", max_length=250, blank=True)
     recording_url = models.URLField("لینک ضبط جلسه", blank=True)
+    reminded_at = models.DateTimeField(null=True, blank=True, editable=False)
 
     class Meta:
         ordering = ["starts_at"]
@@ -496,3 +558,57 @@ class Certificate(models.Model):
 
     def get_absolute_url(self):
         return reverse("courses:certificate", args=[self.code])
+
+
+class Attendance(models.Model):
+    """Attendance of one student at one class session."""
+
+    class Status(models.TextChoices):
+        PRESENT = "present", "حاضر"
+        LATE = "late", "تأخیر"
+        ABSENT = "absent", "غایب"
+        EXCUSED = "excused", "غیبت موجه"
+
+    session = models.ForeignKey(ClassSession, on_delete=models.CASCADE, related_name="attendance")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="attendance")
+    status = models.CharField("وضعیت", max_length=10, choices=Status.choices, default=Status.PRESENT)
+    note = models.CharField("یادداشت", max_length=200, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["session", "user"], name="one_attendance_per_session")]
+        verbose_name = "حضور و غیاب"
+        verbose_name_plural = "حضور و غیاب"
+
+    def __str__(self):
+        return f"{self.user} — {self.session}: {self.get_status_display()}"
+
+
+class WaitlistEntry(models.Model):
+    """Someone waiting for a seat in a batch that is full. Offered a seat (NOTIFIED) when one frees up."""
+
+    HOLD_HOURS = 48
+
+    class Status(models.TextChoices):
+        WAITING = "waiting", "در انتظار"
+        NOTIFIED = "notified", "اطلاع داده شد"
+        ENROLLED = "enrolled", "ثبت‌نام کرد"
+        EXPIRED = "expired", "منقضی شد"
+        CANCELLED = "cancelled", "لغو شد"
+
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="waitlist")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                             related_name="waitlist_entries")
+    full_name = models.CharField("نام و نام خانوادگی", max_length=120)
+    phone = models.CharField("شماره تماس", max_length=20)
+    email = models.EmailField("ایمیل", blank=True)
+    status = models.CharField("وضعیت", max_length=10, choices=Status.choices, default=Status.WAITING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    notified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = "لیست انتظار"
+        verbose_name_plural = "لیست انتظار"
+
+    def __str__(self):
+        return f"{self.full_name} — {self.batch}"

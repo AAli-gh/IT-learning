@@ -1,0 +1,11 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<h2 class="section-title">{{ assignment.title }} <span class="text-sm font-normal text-slate-500">— نمرهٔ کل {{ assignment.max_score|fa_digits }}</span></h2>
+<ul class="space-y-2">
+  {% for s in submissions %}<li><a class="panel !p-3 flex flex-wrap justify-between gap-2 text-sm hover:bg-white/80 dark:hover:bg-slate-800/80" href="{% url 'teacher:grade' course.slug assignment.pk s.pk %}">
+    <span class="font-bold">{{ s.user.display_name }}</span><span class="text-slate-500">{{ s.submitted_at|jdate:"%d %B ساعت %H:%M" }}{% if s.file %} · 📎{% endif %}</span>
+    <span class="pill {% if not s.is_graded %}!bg-none !bg-rose-600{% endif %}">{% if s.is_graded %}نمره {{ s.score|fa_digits }}{% else %}منتظر نمره{% endif %}</span></a></li>
+  {% empty %}<li class="text-slate-500 text-sm">هنوز کسی تحویل نداده است.</li>{% endfor %}
+</ul>
+{% endblock %}

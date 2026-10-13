@@ -1,0 +1,14 @@
+{% load school %}
+<div class="grid gap-3 sm:grid-cols-3 mb-5 text-center">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ r.lessons_percent|fa_digits }}٪</p><p class="text-xs text-slate-500">درس‌ها ({{ r.lessons_done|fa_digits }} از {{ r.lessons_total|fa_digits }})</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{% if r.attendance.rate is None %}—{% else %}{{ r.attendance.rate|fa_digits }}٪{% endif %}</p><p class="text-xs text-slate-500">حضور در کلاس</p></div>
+  <div class="panel"><p class="text-2xl font-black {% if r.certificate %}text-emerald-600{% else %}text-slate-400{% endif %}">{% if r.certificate %}✓{% else %}—{% endif %}</p><p class="text-xs text-slate-500">گواهی</p></div>
+</div>
+<h2 class="section-title">آزمون‌ها</h2>
+<ul class="space-y-2 mb-5">{% for row in r.quizzes %}<li class="panel !p-3 flex justify-between gap-2 text-sm"><span>{{ row.quiz.title }}</span><span>{% if row.best %}{{ row.best.score_percent|fa_digits }}٪ {% if row.best.passed %}✓ قبول{% else %}مردود{% endif %}{% else %}شرکت نکرده{% endif %}</span></li>{% empty %}<li class="text-sm text-slate-500">آزمونی تعریف نشده.</li>{% endfor %}</ul>
+<h2 class="section-title">تکالیف</h2>
+<ul class="space-y-2 mb-5">{% for row in r.assignments %}<li class="panel !p-3 flex justify-between gap-2 text-sm"><span>{{ row.assignment.title }}</span><span>{% if row.submission.is_graded %}{{ row.submission.score|fa_digits }} از {{ row.assignment.max_score|fa_digits }}{% elif row.submission %}در انتظار نمره{% else %}تحویل نشده{% endif %}</span></li>{% empty %}<li class="text-sm text-slate-500">تکلیفی تعریف نشده.</li>{% endfor %}</ul>
+<h2 class="section-title">حضور و غیاب</h2>
+<p class="text-sm leading-8">از {{ r.attendance.total|fa_digits }} جلسهٔ برگزارشده: حاضر {{ r.attendance.present|fa_digits }}، تأخیر {{ r.attendance.late|fa_digits }}، غایب {{ r.attendance.absent|fa_digits }}، غیبت موجه {{ r.attendance.excused|fa_digits }}.</p>
+<h2 class="section-title mt-5">شرایط گواهی</h2>
+<ul class="space-y-1 text-sm">{% for i in r.checklist %}<li class="{% if i.done %}text-emerald-600{% else %}text-slate-500{% endif %}">{% if i.done %}✓{% else %}○{% endif %} {{ i.label }}</li>{% endfor %}</ul>

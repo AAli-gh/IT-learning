@@ -1,0 +1,10 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<div class="grid gap-3 sm:grid-cols-3 text-center">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ student_count|fa_digits }}</p><p class="text-xs text-slate-500">دانشجوی تأییدشده</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ lesson_count|fa_digits }}</p><p class="text-xs text-slate-500">درس</p></div>
+  <div class="panel"><p class="text-2xl font-black {% if ungraded %}text-rose-600{% else %}text-brand-700 dark:text-brand-500{% endif %}">{{ ungraded|fa_digits }}</p><p class="text-xs text-slate-500">منتظر نمره</p></div>
+</div>
+<p class="mt-5 text-sm text-slate-600 dark:text-slate-300 leading-8">آزمون‌ها و تنظیمات دوره (شهریه، انتشار) از پنل مدیریت سایت انجام می‌شود. <a class="text-brand-600" href="{{ course.get_absolute_url }}">مشاهدهٔ صفحهٔ عمومی دوره ←</a></p>
+{% endblock %}

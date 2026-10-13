@@ -1,0 +1,13 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="card p-5"><h2 class="font-extrabold mb-3">اطلاعیهٔ جدید</h2><p class="text-xs text-slate-500 mb-3">با ثبت، برای دانشجویان تأییدشده اعلان (و در صورت فعال بودن، ایمیل) ارسال می‌شود.</p>
+    <form method="post" class="space-y-3">{% include "partials/form.html" %}<button class="btn-primary">ارسال اطلاعیه</button></form></div>
+  <div><h2 class="section-title">اطلاعیه‌های قبلی</h2><ul class="space-y-2">
+    {% for a in items %}<li class="panel !p-3 text-sm"><div class="flex justify-between gap-2"><span class="font-bold">{{ a.title }}</span>
+      <form method="post" action="{% url 'teacher:announcement_delete' course.slug a.pk %}" onsubmit="return confirm('حذف شود؟')">{% csrf_token %}<button class="text-rose-600 text-xs">حذف</button></form></div>
+      <p class="text-xs text-slate-500">{{ a.created_at|jdate }}{% if a.batch %} · فقط {{ a.batch.title }}{% endif %}</p><p class="mt-1 leading-7">{{ a.body|truncatechars:160 }}</p></li>
+    {% empty %}<li class="text-slate-500 text-sm">اطلاعیه‌ای نیست.</li>{% endfor %}</ul></div>
+</div>
+{% endblock %}

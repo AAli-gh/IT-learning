@@ -1,0 +1,14 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<nav class="text-xs text-slate-500 mb-2"><a href="{% url 'teacher:sessions' course.slug %}">← جلسات</a></nav>
+<h2 class="section-title">حضور و غیاب — {{ session.title }} <span class="text-sm font-normal text-slate-500">{{ session.starts_at|jdate:"%d %B ساعت %H:%M" }}</span></h2>
+<form method="post" class="card p-4">{% csrf_token %}
+  <table class="w-full text-sm"><thead><tr class="text-slate-500 text-start"><th class="text-start p-2">دانشجو</th><th class="text-start p-2">وضعیت</th><th class="text-start p-2">یادداشت</th></tr></thead><tbody>
+  {% for r in rows %}<tr class="border-t border-slate-200/60 dark:border-white/10"><td class="p-2 font-medium">{{ r.user.display_name }}</td>
+    <td class="p-2"><div class="flex flex-wrap gap-3">{% for value, label in statuses %}<label class="inline-flex items-center gap-1"><input type="radio" name="status_{{ r.user.pk }}" value="{{ value }}" {% if r.record.status == value or not r.record and value == "present" %}checked{% endif %}>{{ label }}</label>{% endfor %}</div></td>
+    <td class="p-2"><input type="text" name="note_{{ r.user.pk }}" value="{{ r.record.note }}" maxlength="200" class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm"></td></tr>
+  {% empty %}<tr><td colspan="3" class="p-3 text-slate-500">دانشجوی تأییدشده‌ای در این دوره برگزاری نیست.</td></tr>{% endfor %}</tbody></table>
+  {% if rows %}<button class="btn-primary mt-4">ذخیرهٔ حضور و غیاب</button>{% endif %}
+</form>
+{% endblock %}

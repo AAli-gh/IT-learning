@@ -1,0 +1,22 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<div class="grid gap-3 sm:grid-cols-3 text-center mb-6">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ courses|length|fa_digits }}</p><p class="text-xs text-slate-500">دوره‌های من</p></div>
+  <div class="panel"><p class="text-2xl font-black {% if ungraded_count %}text-rose-600{% else %}text-brand-700 dark:text-brand-500{% endif %}">{{ ungraded_count|fa_digits }}</p><p class="text-xs text-slate-500">تکلیف در انتظار نمره</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ upcoming|length|fa_digits }}</p><p class="text-xs text-slate-500">جلسهٔ پیش‌رو</p></div>
+</div>
+<h2 class="section-title">دوره‌های من</h2>
+<div class="grid gap-3 sm:grid-cols-2 mb-6">
+  {% for c in courses %}<a href="{% url 'teacher:course' c.slug %}" class="card p-5 hover:-translate-y-0.5 transition"><p class="font-extrabold">{{ c.title }}</p><p class="text-xs text-slate-500 mt-1">{{ c.student_count|fa_digits }} دانشجو · {% if c.is_published %}منتشر شده{% else %}پیش‌نویس{% endif %}</p></a>
+  {% empty %}<p class="text-slate-500 text-sm">دوره‌ای به شما اختصاص داده نشده است.</p>{% endfor %}
+</div>
+<div class="grid gap-6 md:grid-cols-2">
+  <div><h2 class="section-title">منتظر نمره</h2><ul class="space-y-2">
+    {% for s in ungraded %}<li><a class="panel !p-3 block text-sm hover:bg-white/80 dark:hover:bg-slate-800/80" href="{% url 'teacher:grade' s.assignment.course.slug s.assignment.pk s.pk %}"><span class="font-bold">{{ s.user.display_name }}</span> — {{ s.assignment.title }}<span class="block text-xs text-slate-500">{{ s.assignment.course.title }} · {{ s.submitted_at|jdate:"%d %B" }}</span></a></li>
+    {% empty %}<li class="text-slate-500 text-sm">همه نمره‌گذاری شده‌اند 🎉</li>{% endfor %}</ul></div>
+  <div><h2 class="section-title">جلسات پیش‌رو</h2><ul class="space-y-2">
+    {% for s in upcoming %}<li><a class="panel !p-3 block text-sm hover:bg-white/80 dark:hover:bg-slate-800/80" href="{% url 'teacher:attendance' s.batch.course.slug s.pk %}"><span class="font-bold">{{ s.title }}</span><span class="block text-xs text-slate-500">{{ s.batch.course.title }} · {{ s.starts_at|jdate:"%d %B ساعت %H:%M" }}</span></a></li>
+    {% empty %}<li class="text-slate-500 text-sm">جلسه‌ای برنامه‌ریزی نشده است.</li>{% endfor %}</ul></div>
+</div>
+{% endblock %}

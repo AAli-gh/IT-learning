@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load school %}
+{% block og %}{{ block.super }}{% for ld in jsonld %}<script type="application/ld+json">{{ ld|safe }}</script>{% endfor %}{% endblock %}
 {% block content %}
 <section class="card !rounded-[2rem] p-8 sm:p-12 text-center">
   <h1 class="text-3xl sm:text-5xl font-black leading-[1.4]">مهارت‌های <span class="bg-gradient-to-l from-brand-500 to-violet-600 bg-clip-text text-transparent">IT</span> را حرفه‌ای یاد بگیرید</h1>

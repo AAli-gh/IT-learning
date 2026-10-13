@@ -1,0 +1,12 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<div class="flex justify-between items-center mb-3"><h2 class="section-title !mb-0">تکالیف</h2><a class="btn-primary" href="{% url 'teacher:assignment_new' course.slug %}">＋ تکلیف جدید</a></div>
+<ul class="space-y-2">
+  {% for a in rows %}<li class="panel !p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+    <a class="font-bold" href="{% url 'teacher:assignment' course.slug a.pk %}">{{ a.title }}{% if not a.is_published %} <span class="pill !bg-none !bg-slate-500">پیش‌نویس</span>{% endif %}</a>
+    <span class="text-slate-500">{{ a.total|fa_digits }} تحویل · <span class="{% if a.ungraded %}text-rose-600 font-bold{% endif %}">{{ a.ungraded|fa_digits }} منتظر نمره</span>{% if a.due_at %} · مهلت {{ a.due_at|jdate:"%d %B" }}{% endif %}</span>
+    <a class="btn-ghost !py-1" href="{% url 'teacher:assignment_edit' course.slug a.pk %}">ویرایش</a></li>
+  {% empty %}<li class="text-slate-500 text-sm">تکلیفی تعریف نشده است.</li>{% endfor %}
+</ul>
+{% endblock %}

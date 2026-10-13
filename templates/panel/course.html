@@ -3,6 +3,7 @@
 {% block panel %}
 <nav class="text-xs text-slate-500 mb-2"><a href="{% url 'panel:courses' %}">دوره‌های من</a> ‹ {{ course.title }}</nav>
 <h1 class="text-2xl font-extrabold">{{ course.title }}</h1>
+<p class="mt-1"><a class="btn-ghost !py-1 text-sm" href="{% url 'panel:report' course.slug %}">📋 کارنامه و حضور و غیاب</a></p>
 <div class="my-3">{% include "panel/partials/progress.html" %}<p class="text-xs text-slate-500 mt-1">{{ percent|fa_digits }}٪ تکمیل</p></div>
 
 {% if announcements %}<div class="space-y-2 mb-6">{% for a in announcements %}<div class="panel !p-3 text-sm"><p class="font-bold">📢 {{ a.title }}</p><p class="mt-1 leading-7">{{ a.body|linebreaksbr }}</p></div>{% endfor %}</div>{% endif %}

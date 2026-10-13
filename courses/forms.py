@@ -23,6 +23,9 @@ class EnrollmentForm(forms.ModelForm):
         self.course = course
         self.fields["batch"].queryset = course.batches.filter(is_open=True)
         self.fields["batch"].required = False
+        self.fields["batch"].label_from_instance = lambda b: (
+            f"{b.title or b.start_date} ({b.get_mode_display()})"
+            + ("" if b.accepts_enrollment else " — تکمیل ظرفیت؛ ثبت در لیست انتظار"))
         self.fields["batch"].empty_label = "هنوز مطمئن نیستم / فعلاً مشاوره می‌خواهم"
         self.fields["email"].required = False
 
@@ -37,11 +40,6 @@ class EnrollmentForm(forms.ModelForm):
             raise forms.ValidationError("شماره موبایل معتبر وارد کنید (مثلاً ۰۹۱۲۱۲۳۴۵۶۷).")
         return phone
 
-    def clean_batch(self):
-        batch = self.cleaned_data.get("batch")
-        if batch and not batch.accepts_enrollment:
-            raise forms.ValidationError("ظرفیت این دوره تکمیل شده است.")
-        return batch
 
 
 class ReviewForm(forms.ModelForm):

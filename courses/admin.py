@@ -1,13 +1,11 @@
 from django import forms
 from django.contrib import admin
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.html import format_html
 
-from core.notify import notify_student
-
 from .models import (Announcement, Assignment, Batch, Category, Certificate, Choice, ClassSession, Course, Enrollment,
-                     Faq, Lesson, Question, Quiz, QuizAttempt, Review, Submission, Topic)
+                     Faq, Lesson, Question, Quiz, QuizAttempt, Review, Submission, Topic, WaitlistEntry,
+                     Attendance)
 
 
 @admin.register(Category)
@@ -52,31 +50,18 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
-    list_display = ("full_name", "phone", "course", "batch", "status", "created_at")
+    list_display = ("full_name", "phone", "course", "batch", "status", "price", "paid_amount", "created_at")
     list_filter = ("status", "course")
-    list_editable = ("status",)
+    list_editable = ("status", "paid_amount")
     search_fields = ("full_name", "phone", "email")
     date_hierarchy = "created_at"
     actions = ["confirm", "cancel"]
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if change and "status" in form.changed_data and obj.status == Enrollment.Status.CONFIRMED:
-            self._notify_confirmed(obj)
-
-    @staticmethod
-    def _notify_confirmed(enrollment):
-        email = enrollment.email or (enrollment.user.email if enrollment.user else "")
-        notify_student(email, f"ثبت‌نام شما در «{enrollment.course.title}» تأیید شد",
-                       f"{enrollment.full_name} عزیز،\nثبت‌نام شما تأیید شد. از پنل دانشجو می‌توانید محتوا و "
-                       "برنامهٔ کلاس‌ها را ببینید.")
 
     @admin.action(description="تأیید ثبت‌نام‌های انتخاب‌شده")
     def confirm(self, request, queryset):
         for enrollment in queryset.exclude(status=Enrollment.Status.CONFIRMED).select_related("course", "user"):
             enrollment.status = Enrollment.Status.CONFIRMED
-            enrollment.save(update_fields=["status"])
-            self._notify_confirmed(enrollment)
+            enrollment.save(update_fields=["status"])  # the signal sends the confirmation
 
     @admin.action(description="لغو ثبت‌نام‌های انتخاب‌شده")
     def cancel(self, request, queryset):
@@ -189,17 +174,12 @@ class SubmissionAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">دانلود فایل</a>', url)
 
     def save_model(self, request, obj, form, change):
-        from core.notify import notify_student
+        from .grading import grade_submission
 
-        if obj.score is not None and obj.score > obj.assignment.max_score:
-            obj.score = obj.assignment.max_score
-        newly_graded = "score" in form.changed_data and obj.score is not None
-        if newly_graded:
-            obj.graded_at = timezone.now()
-        super().save_model(request, obj, form, change)
-        if newly_graded:
-            notify_student(obj.user.email, f"نمرهٔ تکلیف «{obj.assignment.title}»",
-                           f"نمرهٔ شما: {obj.score} از {obj.assignment.max_score}\n\n{obj.feedback}")
+        if "score" in form.changed_data and obj.score is not None:
+            grade_submission(obj, obj.score, obj.feedback)  # caps the score, stamps graded_at, notifies the student
+        else:
+            super().save_model(request, obj, form, change)
 
 
 @admin.register(Certificate)
@@ -209,3 +189,16 @@ class CertificateAdmin(admin.ModelAdmin):
     list_editable = ("is_revoked",)
     search_fields = ("code", "holder_name", "user__username")
     readonly_fields = ("code",)
+
+
+@admin.register(WaitlistEntry)
+class WaitlistEntryAdmin(admin.ModelAdmin):
+    list_display = ("full_name", "phone", "batch", "status", "created_at", "notified_at")
+    list_filter = ("status", "batch__course")
+    search_fields = ("full_name", "phone", "email")
+
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ("user", "session", "status")
+    list_filter = ("status", "session__batch__course")

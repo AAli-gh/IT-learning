@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load school %}
+{% block title %}گزارش‌ها | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+  <h1 class="text-2xl font-extrabold">📊 گزارش‌ها</h1>
+  <div class="nav-capsule">{% for p in periods %}<a class="nav-item {% if p == days %}is-active{% endif %}" href="?days={{ p }}">{{ p|fa_digits }} روز اخیر</a>{% endfor %}</div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-center mb-6">
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ kpi.new|fa_digits }}</p><p class="text-xs text-slate-500">ثبت‌نام جدید ({{ days|fa_digits }} روز)</p></div>
+  <div class="panel"><p class="text-2xl font-black {% if kpi.pending %}text-amber-600{% else %}text-brand-700 dark:text-brand-500{% endif %}">{{ kpi.pending|fa_digits }}</p><p class="text-xs text-slate-500">در انتظار تأیید</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ kpi.students|fa_digits }}</p><p class="text-xs text-slate-500">دانشجوی فعال ({{ kpi.confirmed|fa_digits }} ثبت‌نام)</p></div>
+  <div class="panel"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ kpi.waiting|fa_digits }}</p><p class="text-xs text-slate-500">در لیست انتظار</p></div>
+  <div class="panel col-span-2 lg:col-span-1"><p class="text-lg font-black text-emerald-600">{{ kpi.collected|money }}</p><p class="text-xs text-slate-500">دریافت‌شده</p></div>
+  <div class="panel col-span-2 lg:col-span-1"><p class="text-lg font-black text-brand-700 dark:text-brand-500">{{ kpi.expected|money }}</p><p class="text-xs text-slate-500">شهریهٔ ثبت‌نام‌های تأییدشده</p></div>
+  <div class="panel col-span-2 lg:col-span-1"><p class="text-lg font-black {% if kpi.outstanding %}text-rose-600{% else %}text-slate-500{% endif %}">{{ kpi.outstanding|money }}</p><p class="text-xs text-slate-500">مانده (مطالبات)</p></div>
+  <div class="panel col-span-2 lg:col-span-1"><p class="text-2xl font-black text-brand-700 dark:text-brand-500">{{ kpi.certificates|fa_digits }}</p><p class="text-xs text-slate-500">گواهی صادرشده</p></div>
+</div>
+<p class="text-xs text-slate-500 -mt-3 mb-6">مبالغ بر اساس شهریهٔ ثبت‌شده و «مبلغ پرداخت‌شده» در هر ثبت‌نام (ثبت دستی در پنل مدیریت) است، نه درگاه پرداخت.</p>
+
+<section class="card p-5 mb-6">
+  <h2 class="font-extrabold mb-1">روند ثبت‌نام</h2><p class="text-xs text-slate-500 mb-3">{{ trend_total|fa_digits }} ثبت‌نام در {{ days|fa_digits }} روز{% if days > 90 %} (هفتگی){% endif %}</p>
+  <div class="flex items-end gap-[2px] h-32" role="img" aria-label="نمودار ثبت‌نام">
+    {% for b in trend %}<div class="flex-1 min-w-[2px] rounded-t bg-gradient-to-t from-brand-600 to-violet-600" style="height: {{ b.height }}%" title="{{ b.day|jdate:'%d %B' }}: {{ b.count|fa_digits }}"></div>{% endfor %}
+  </div>
+</section>
+
+<section class="card p-5 overflow-x-auto">
+  <h2 class="font-extrabold mb-3">پرکاربردترین دوره‌ها</h2>
+  <table class="w-full text-sm"><thead><tr class="text-slate-500"><th class="text-start p-2">دوره</th><th class="text-start p-2 min-w-[8rem]">ثبت‌نام جدید</th><th class="text-start p-2">تأییدشده</th><th class="text-start p-2">دریافتی</th><th class="text-start p-2">نرخ تکمیل</th><th class="text-start p-2">امتیاز</th></tr></thead><tbody>
+  {% for r in rows %}<tr class="border-t border-slate-200/60 dark:border-white/10">
+    <td class="p-2 font-bold">{{ r.course.title }}{% if not r.course.is_published %} <span class="pill !bg-none !bg-slate-500">پیش‌نویس</span>{% endif %}</td>
+    <td class="p-2"><div class="flex items-center gap-2"><div class="h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden"><div class="h-full bg-brand-600" style="width: {{ r.bar }}%"></div></div><span>{{ r.new|fa_digits }}</span></div></td>
+    <td class="p-2">{{ r.confirmed|fa_digits }}</td><td class="p-2">{{ r.collected|money }}</td>
+    <td class="p-2">{% if r.completion is None %}—{% else %}{{ r.completion|fa_digits }}٪ ({{ r.certificates|fa_digits }}){% endif %}</td><td class="p-2">{% if r.rating %}★ {{ r.rating|fa_digits }}{% else %}—{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="p-3 text-slate-500">دوره‌ای نیست.</td></tr>{% endfor %}</tbody></table>
+  <p class="text-xs text-slate-500 mt-3">نرخ تکمیل = گواهی‌های صادرشده ÷ ثبت‌نام‌های تأییدشدهٔ آن دوره.</p>
+</section>
+{% endblock %}

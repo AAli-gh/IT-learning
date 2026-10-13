@@ -24,6 +24,19 @@ def course_for_student(user, slug):
     return course
 
 
+def can_view_content(user, course):
+    """Students with a confirmed enrollment, the course's own instructor, and superusers."""
+    return (user.is_superuser or course.instructor_id == user.pk
+            or confirmed_enrollments(user).filter(course=course).exists())
+
+
+def course_for_content(user, slug):
+    course = get_object_or_404(Course, slug=slug)
+    if not can_view_content(user, course):
+        raise Http404
+    return course
+
+
 def my_announcements(user):
     enrollments = confirmed_enrollments(user)
     course_ids = enrollments.values_list("course_id", flat=True)
@@ -31,3 +44,12 @@ def my_announcements(user):
     # A batch-specific notice only reaches students of that batch; course-wide notices reach all.
     own_batch = Q(batch__isnull=True) | Q(batch_id__in=batch_ids)
     return Announcement.objects.filter(is_published=True, course_id__in=course_ids).filter(own_batch).select_related("course")
+
+
+def announcement_audience(announcement):
+    """Users who should receive ``announcement``: confirmed students of the course (of the batch, if it has one)."""
+    enrollments = Enrollment.objects.filter(course=announcement.course, status=Enrollment.Status.CONFIRMED,
+                                            user__isnull=False).select_related("user")
+    if announcement.batch_id:
+        enrollments = enrollments.filter(batch_id=announcement.batch_id)
+    return list({e.user_id: e.user for e in enrollments}.values())

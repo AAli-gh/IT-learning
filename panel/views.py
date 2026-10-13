@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -15,7 +16,12 @@ from courses.certificates import issue_certificate, requirements
 from courses.models import (Assignment, Certificate, ClassSession, Enrollment, Lesson, LessonProgress, Quiz, QuizAttempt,
                             Submission)
 
-from .access import confirmed_enrollments, course_for_student, my_announcements, my_courses
+from core.streaming import ranged_file_response
+from courses.reports import student_report
+from notifications.models import Notification
+from notifications.services import notify
+
+from .access import (confirmed_enrollments, course_for_content, course_for_student, my_announcements, my_courses)
 
 
 def _progress(user, course):
@@ -110,8 +116,19 @@ def toggle_lesson(request, slug, pk):
 
 
 @login_required
+def lesson_video(request, slug, pk):
+    """Stream the uploaded video (with Range support) to people allowed to see the course content."""
+    course = course_for_content(request.user, slug)
+    obj = get_object_or_404(Lesson, pk=pk, course=course, is_published=True)
+    if not obj.video_file:
+        raise Http404
+    kind = "video/webm" if obj.video_file.name.lower().endswith(".webm") else "video/mp4"
+    return ranged_file_response(request, obj.video_file, kind)
+
+
+@login_required
 def lesson_file(request, slug, pk):
-    course = course_for_student(request.user, slug)
+    course = course_for_content(request.user, slug)
     obj = get_object_or_404(Lesson, pk=pk, course=course, is_published=True)
     if not obj.attachment:
         raise Http404
@@ -281,7 +298,12 @@ def assignment_detail(request, slug, pk):
             if upload:
                 submission.file = upload
             submission.submitted_at = timezone.now()
+            first_time = submission.pk is None
             submission.save()
+            if first_time and course.instructor:
+                notify(course.instructor, f"تحویل جدید: {assignment.title}",
+                       f"{request.user.display_name} تکلیف «{assignment.title}» را تحویل داد.",
+                       reverse("teacher:assignment", args=[course.slug, assignment.pk]), email=False)
             messages.success(request, "پاسخ شما ثبت شد.")
             return redirect("panel:assignment", slug=slug, pk=pk)
     return render(request, "panel/assignment.html", {
@@ -294,7 +316,9 @@ def assignment_detail(request, slug, pk):
 def submission_file(request, pk):
     """Owner or grading staff only."""
     submission = get_object_or_404(Submission.objects.select_related("assignment"), pk=pk)
-    is_grader = request.user.is_active and request.user.has_perm("courses.change_submission")
+    is_grader = request.user.is_active and (
+        request.user.has_perm("courses.change_submission")
+        or submission.assignment.course.instructor_id == request.user.pk)
     if submission.user_id != request.user.pk and not is_grader:
         raise Http404
     if not submission.file:
@@ -323,3 +347,37 @@ def certificate_issue(request, slug):
         return redirect("panel:course", slug=slug)
     messages.success(request, "گواهی شما صادر شد.")
     return redirect("courses:certificate", code=certificate.code)
+
+
+# ---------------------------------------------------------- report card
+
+@login_required
+def report(request, slug):
+    course = course_for_student(request.user, slug)
+    return render(request, "panel/report.html", {"section": "courses", "course": course,
+                                                 "r": student_report(request.user, course)})
+
+
+# ----------------------------------------------------------- notifications
+
+@login_required
+def notifications(request):
+    items = Notification.objects.filter(user=request.user)[:100]
+    return render(request, "panel/notifications.html", {"section": "notifications", "items": items})
+
+
+@login_required
+@require_POST
+def notifications_read_all(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return redirect("panel:notifications")
+
+
+@login_required
+def notification_open(request, pk):
+    """Mark as read and continue to the notification's (internal) link."""
+    note = get_object_or_404(Notification, pk=pk, user=request.user)
+    if not note.is_read:
+        note.is_read = True
+        note.save(update_fields=["is_read"])
+    return redirect(note.url if note.url.startswith("/") and not note.url.startswith("//") else "panel:notifications")

@@ -1,0 +1,13 @@
+{% extends "teacher/base.html" %}
+{% load school %}
+{% block teach %}
+<div class="flex justify-between items-center mb-3"><h2 class="section-title !mb-0">درس‌ها</h2><a class="btn-primary" href="{% url 'teacher:lesson_new' course.slug %}">＋ درس جدید</a></div>
+<ul class="space-y-2">
+  {% for l in lessons %}<li class="panel !p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+    <span><span class="text-slate-500">{{ l.order|fa_digits }}.</span> <span class="font-bold">{{ l.title }}</span>
+      {% if l.video_file %}<span title="ویدئوی آپلودی"> 🎬</span>{% elif l.video_url %}<span title="لینک ویدئو"> 🔗</span>{% endif %}{% if l.attachment %} 📎{% endif %}{% if not l.is_published %} <span class="pill !bg-none !bg-slate-500">پیش‌نویس</span>{% endif %}</span>
+    <span class="flex gap-2"><a class="btn-ghost !py-1" href="{% url 'teacher:lesson_edit' course.slug l.pk %}">ویرایش</a>
+      <form method="post" action="{% url 'teacher:lesson_delete' course.slug l.pk %}" onsubmit="return confirm('درس و فایل‌هایش حذف شود؟')">{% csrf_token %}<button class="btn-ghost !py-1 !text-rose-600">حذف</button></form></span></li>
+  {% empty %}<li class="text-slate-500 text-sm">هنوز درسی اضافه نشده است.</li>{% endfor %}
+</ul>
+{% endblock %}

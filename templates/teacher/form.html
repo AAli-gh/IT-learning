@@ -1,0 +1,10 @@
+{% extends "teacher/base.html" %}
+{% block teach %}
+<div class="card p-6 max-w-2xl">
+  <h2 class="text-xl font-extrabold mb-4">{{ title }}</h2>
+  <form method="post" {% if multipart %}enctype="multipart/form-data"{% endif %} class="space-y-4">
+    {% include "partials/form.html" %}
+    <div class="flex gap-2"><button class="btn-primary">ذخیره</button><a class="btn-ghost" href="{% url back course.slug %}">انصراف</a></div>
+  </form>
+</div>
+{% endblock %}

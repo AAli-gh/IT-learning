@@ -5,6 +5,12 @@
 <div class="grid gap-6 xl:grid-cols-[1fr_16rem]">
   <article class="card p-6">
     <h1 class="text-2xl font-extrabold mb-3">{{ lesson.title }}</h1>
+    {% if lesson.video_file %}
+    {# Streamed through an access-checked view; the controls below only discourage casual downloading. #}
+    <video class="w-full rounded-2xl bg-black mb-4" controls preload="metadata" playsinline
+           controlsList="nodownload noremoteplayback" disablePictureInPicture oncontextmenu="return false"
+           src="{% url 'panel:lesson_video' course.slug lesson.pk %}">مرورگر شما پخش ویدئو را پشتیبانی نمی‌کند.</video>
+    {% endif %}
     {% if lesson.video_url %}<p class="mb-3"><a class="btn-primary" href="{{ lesson.video_url }}" target="_blank" rel="noopener">▶ مشاهدهٔ ویدئو</a></p>{% endif %}
     {% if lesson.body %}<div class="prose prose-slate dark:prose-invert max-w-none leading-8">{{ lesson.body_html|safe }}</div>{% endif %}
     {% if lesson.attachment %}<p class="mt-4"><a class="btn-ghost" href="{% url 'panel:lesson_file' course.slug lesson.pk %}">📎 دریافت فایل ضمیمه</a></p>{% endif %}

@@ -1,7 +1,15 @@
 {% extends "base.html" %}
-{% load school %}
+{% load static school %}
 {% block title %}{{ course.meta_title|default:course.title }} | {{ SITE_NAME }}{% endblock %}
 {% block meta_description %}{{ course.meta_description|default:course.summary }}{% endblock %}
+{% block og %}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ course.meta_title|default:course.title }}">
+<meta property="og:description" content="{{ course.meta_description|default:course.summary }}">
+<meta property="og:image" content="{% if course.cover %}{{ SITE_URL }}{{ course.cover.url }}{% else %}{{ SITE_URL }}{% static 'brand/og-default.jpg' %}{% endif %}">
+<meta name="twitter:card" content="summary_large_image">
+{% for ld in jsonld %}<script type="application/ld+json">{{ ld|safe }}</script>{% endfor %}
+{% endblock %}
 {% block content %}
 <nav class="text-xs text-slate-500 mb-3"><a href="{% url 'courses:home' %}">خانه</a> ‹ <a href="{{ course.category.get_absolute_url }}">{{ course.category.name }}</a></nav>
 <div class="grid gap-6 lg:grid-cols-[1fr_22rem]">

@@ -8,10 +8,12 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import User
 from core import magazine
+from core.models import SiteSettings
+from . import seo
 from core.notify import notify_staff, notify_student
 
 from .forms import EnrollmentForm, ReviewForm
-from .models import Batch, Category, Certificate, Course, Enrollment, Faq, Review
+from .models import Batch, Category, Certificate, Course, Enrollment, Faq, Review, WaitlistEntry
 
 SORTS = {"new": "-published_at", "price": "price", "price_desc": "-price", "duration": "duration_hours"}
 ENROLL_LIMIT = (5, 3600)  # at most 5 enrollments per hour per IP
@@ -20,6 +22,8 @@ ENROLL_LIMIT = (5, 3600)  # at most 5 enrollments per hour per IP
 def home(request):
     courses = Course.objects.published().with_relations()
     return render(request, "courses/home.html", {
+        "jsonld": [seo.dumps(seo.website(request, settings.SITE_NAME)),
+                   seo.dumps({"@context": "https://schema.org", **seo.organization(request, settings.SITE_NAME)})],
         "featured": courses.filter(is_featured=True)[:3] or courses[:3],
         "latest": courses.order_by("-published_at")[:6],
         "home_categories": Category.objects.filter(show_on_home=True),
@@ -66,8 +70,12 @@ def course_detail(request, slug):
         can_review = my_review is None and Enrollment.objects.filter(
             course=course, user=request.user, status=Enrollment.Status.CONFIRMED).exists()
     related = Course.objects.published().with_relations().filter(category=course.category).exclude(pk=course.pk)[:3]
+    name = SiteSettings.load().site_name or settings.SITE_NAME
     return render(request, "courses/detail.html", {
         "course": course,
+        "jsonld": [seo.dumps(seo.course(request, course, name)),
+                   seo.dumps(seo.breadcrumbs(request, [("خانه", "/"), (course.category.name, course.category.get_absolute_url()),
+                                                       (course.title, course.get_absolute_url())]))],
         "form": EnrollmentForm(course=course, initial=initial),
         "related_courses": related,
         "reviews": Review.objects.filter(course=course, is_approved=True).select_related("user"),
@@ -83,6 +91,23 @@ def _client_ip(request):
     return request.META.get("REMOTE_ADDR", "")
 
 
+def _join_waitlist(request, course, form, key, count, window):
+    """The chosen batch is full: put the person on its waiting list instead of enrolling them."""
+    batch, data = form.cleaned_data["batch"], form.cleaned_data
+    active = [WaitlistEntry.Status.WAITING, WaitlistEntry.Status.NOTIFIED]
+    already = batch.waitlist.filter(phone=data["phone"], status__in=active).exists()
+    if not already:
+        WaitlistEntry.objects.create(batch=batch, user=request.user if request.user.is_authenticated else None,
+                                     full_name=data["full_name"], phone=data["phone"], email=data.get("email", ""))
+        cache.set(key, count + 1, window)
+    if request.headers.get("HX-Request"):
+        return render(request, "courses/partials/enroll_done.html", {"course": course, "waitlisted": True,
+                                                                      "already": already})
+    messages.success(request, "شما قبلاً در لیست انتظار هستید." if already else
+                     "ظرفیت تکمیل است؛ شما در لیست انتظار ثبت شدید و با باز شدن جا خبر می‌دهیم.")
+    return redirect(course)
+
+
 @require_POST
 def enroll(request, slug):
     course = get_object_or_404(Course.objects.published(), slug=slug)
@@ -92,6 +117,9 @@ def enroll(request, slug):
     if count >= limit:
         return render(request, "429.html", status=429)
     form = EnrollmentForm(request.POST, course=course)
+    if form.is_valid() and form.cleaned_data.get("batch") and not form.cleaned_data["batch"].accepts_enrollment_for(
+            form.cleaned_data["phone"]):
+        return _join_waitlist(request, course, form, key, count, window)
     if form.is_valid():
         enrollment = form.save(commit=False)
         enrollment.course = course

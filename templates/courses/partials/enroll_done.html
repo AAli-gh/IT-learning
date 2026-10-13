@@ -1,3 +1,5 @@
 <div class="rounded-2xl bg-emerald-50/80 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 p-4 text-sm" role="status">
-  ✅ ثبت‌نام شما برای «{{ course.title }}» انجام شد. همکاران ما به‌زودی با شما تماس می‌گیرند.
+  {% if waitlisted %}
+    {% if already %}⏳ شما قبلاً برای این دوره در لیست انتظار ثبت شده‌اید.{% else %}⏳ ظرفیت این دوره تکمیل است؛ شما در لیست انتظار «{{ course.title }}» ثبت شدید و به‌محض باز شدن جا خبر می‌دهیم.{% endif %}
+  {% else %}✅ ثبت‌نام شما برای «{{ course.title }}» انجام شد. همکاران ما به‌زودی با شما تماس می‌گیرند.{% endif %}
 </div>

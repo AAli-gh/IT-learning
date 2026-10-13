@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load school %}
+{% block title %}پنل مدرس | {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="text-2xl font-extrabold">🧑‍🏫 {% if course %}{{ course.title }}{% else %}پنل مدرس{% endif %}</h1>
+  <div class="flex gap-2 text-sm">{% if course %}<a class="btn-ghost" href="{% url 'teacher:dashboard' %}">همهٔ دوره‌ها</a>{% endif %}<a class="btn-ghost" href="{% url 'panel:dashboard' %}">پنل دانشجو</a></div>
+</div>
+{% if course %}
+<nav class="nav-capsule no-scrollbar mb-5" aria-label="مدیریت دوره">
+  {% url 'teacher:course' course.slug as u0 %}{% url 'teacher:lessons' course.slug as u1 %}{% url 'teacher:assignments' course.slug as u2 %}{% url 'teacher:sessions' course.slug as u3 %}{% url 'teacher:students' course.slug as u4 %}{% url 'teacher:announcements' course.slug as u5 %}
+  <a class="nav-item {% if tab == 'home' %}is-active{% endif %}" href="{{ u0 }}">خلاصه</a>
+  <a class="nav-item {% if tab == 'lessons' %}is-active{% endif %}" href="{{ u1 }}">درس‌ها</a>
+  <a class="nav-item {% if tab == 'assignments' %}is-active{% endif %}" href="{{ u2 }}">تکالیف</a>
+  <a class="nav-item {% if tab == 'sessions' %}is-active{% endif %}" href="{{ u3 }}">جلسات و حضور و غیاب</a>
+  <a class="nav-item {% if tab == 'students' %}is-active{% endif %}" href="{{ u4 }}">دانشجویان</a>
+  <a class="nav-item {% if tab == 'announcements' %}is-active{% endif %}" href="{{ u5 }}">اطلاعیه‌ها</a>
+</nav>
+{% endif %}
+{% block teach %}{% endblock %}
+{% endblock %}

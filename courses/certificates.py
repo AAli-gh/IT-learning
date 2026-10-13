@@ -1,5 +1,7 @@
 """Certificate rules: what a student must finish, and issuing the certificate."""
 
+from notifications.services import notify
+
 from .models import Certificate, Enrollment, LessonProgress, QuizAttempt, Submission
 
 
@@ -37,4 +39,6 @@ def issue_certificate(user, course):
     enrollment = Enrollment.objects.filter(user=user, course=course, status=Enrollment.Status.CONFIRMED).first()
     if not enrollment or not is_eligible(user, course):
         return None
-    return Certificate.objects.create(user=user, course=course, holder_name=enrollment.full_name or user.display_name)
+    cert = Certificate.objects.create(user=user, course=course, holder_name=enrollment.full_name or user.display_name)
+    notify(user, f"گواهی «{course.title}» صادر شد", "تبریک! گواهی پایان دورهٔ شما آماده است.", cert.get_absolute_url())
+    return cert
